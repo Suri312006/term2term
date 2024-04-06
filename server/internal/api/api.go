@@ -11,8 +11,17 @@ type Server struct {
 
 
 func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request){
-    w.WriteHeader(http.StatusOK)
 
-    fmt.Fprintf(w, "lmfao")
+
+    if r.Method == http.MethodPost{
+        w.WriteHeader(http.StatusAccepted)
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+    fmt.Fprintf(w, "hi albert pookie!!!")
 }
+
+
+
 

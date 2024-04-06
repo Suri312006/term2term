@@ -5,25 +5,38 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/suri312006/term2term/v2/internal/api"
+	api "github.com/suri312006/term2term/v2/internal/api"
 )
 
-func TestConnectionHandler(t *testing.T) {
+func TestServeHTTP(t *testing.T) {
 
 	t.Run("should return a 200 code if pinged", func(t *testing.T) {
-		req, _ := http.NewRequest(http.MethodGet, "/listen", nil)
+		req, _ := http.NewRequest(http.MethodGet, "/", nil)
 		res := httptest.NewRecorder()
 
-		server := listen.Server{}
+		server := api.Server{}
 
 		server.ServeHTTP(res, req)
 
-		got := res.Code
-		want := http.StatusOK
-
-		if got != want {
-			t.Errorf("got %v want %v", got, want)
-		}
+		assertCode(t, res, http.StatusOK)
 	})
+
+	t.Run("Should return status accepted on POST request ", func(t *testing.T) {
+		req, _ := http.NewRequest(http.MethodPost, "/send_message/", nil)
+		res := httptest.NewRecorder()
+
+		server := api.Server{}
+
+		server.ServeHTTP(res, req)
+
+		assertCode(t, res, http.StatusAccepted)
+	})
+
+}
+func assertCode(t testing.TB, got *httptest.ResponseRecorder, wantedCode int) {
+	t.Helper()
+	if got.Code != wantedCode {
+		t.Errorf("incorrect code, got %v want %v", got.Code, wantedCode)
+	}
 
 }
