@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/suri312006/term2term/v2/internal/listen"
+	"github.com/suri312006/term2term/v2/internal/api"
 )
 
 func TestConnectionHandler(t *testing.T) {
@@ -16,7 +16,7 @@ func TestConnectionHandler(t *testing.T) {
 
 		server := listen.Server{}
 
-		server.ServeHttp(res, req)
+		server.ServeHTTP(res, req)
 
 		got := res.Code
 		want := http.StatusOK
