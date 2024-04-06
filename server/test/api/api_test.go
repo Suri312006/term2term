@@ -22,7 +22,7 @@ func TestServeHTTP(t *testing.T) {
 	})
 
 	t.Run("Should return status accepted on POST request ", func(t *testing.T) {
-		req, _ := http.NewRequest(http.MethodPost, "/send_message/", nil)
+		req, _ := http.NewRequest(http.MethodPost, "/", nil)
 		res := httptest.NewRecorder()
 
 		server := api.Server{}
