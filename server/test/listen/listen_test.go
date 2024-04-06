@@ -11,15 +11,15 @@ import (
 func TestConnectionHandler(t *testing.T) {
 
 	t.Run("should return a 200 code if pinged", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/listen", nil)
-		response := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodGet, "/listen", nil)
+		res := httptest.NewRecorder()
 
-		listen.ConnectionHandler(request, response)
+		server := listen.Server{}
 
-		// unsure how this works
+		server.ServeHttp(res, req)
 
+		got := res.Code
 		want := http.StatusOK
-		got := response.Code
 
 		if got != want {
 			t.Errorf("got %v want %v", got, want)
