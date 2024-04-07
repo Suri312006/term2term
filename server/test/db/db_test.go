@@ -23,16 +23,7 @@ func TestNew(t *testing.T) {
 		db := Db.New(testDbFilePath)
 		defer db.DeleteDb()
 
-		fileInfo, err := os.Stat(testDbFilePath)
-
-		if err != nil {
-			t.Fatal("Was not able to stat directory")
-		}
-
-		if fileInfo.Size() != 0 {
-			t.Errorf("File was not empyty")
-		}
-
+		checkEmptyDb(t)
 	})
 }
 
@@ -46,7 +37,7 @@ func TestDeleteDb(t *testing.T) {
 		_, err := os.Stat(testDbFilePath)
 
 		if err == nil {
-			t.Errorf("%v", err)
+			t.Errorf("file should not exist, but %v", err)
 		}
 
 	})
@@ -66,25 +57,54 @@ func TestInsertDB(t *testing.T) {
 
 		db.InsertDB(testData)
 
-		file, err := os.Open(testDbFilePath)
+		file := openDb(t)
 
-		if err != nil {
-			panic(err)
-		}
-
-		dec := json.NewDecoder(file)
-
-		encodedData := Db.Entry{}
-
-		err = dec.Decode(&encodedData)
-
-		if err != nil {
-			panic(err)
-		}
-
-		if !reflect.DeepEqual(testData, encodedData) {
-			t.Errorf("got %v wanted %v", encodedData, testData)
-		}
+		verifyFileContents(t, file, testData)
 
 	})
+}
+
+func verifyFileContents(t testing.TB, file *os.File, want Db.Entry) {
+
+	t.Helper()
+
+	dec := json.NewDecoder(file)
+
+	encodedData := Db.Entry{}
+
+	err := dec.Decode(&encodedData)
+
+	if err != nil {
+		panic(err)
+	}
+
+	if !reflect.DeepEqual(want, encodedData) {
+		t.Errorf("got %v wanted %v", encodedData, want)
+	}
+
+}
+
+func openDb(t testing.TB) *os.File {
+
+	file, err := os.Open(testDbFilePath)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return file
+}
+
+func checkEmptyDb(t testing.TB) {
+	t.Helper()
+
+	fileInfo, err := os.Stat(testDbFilePath)
+
+	if err != nil {
+		t.Fatal("Was not able to stat directory")
+	}
+
+	if fileInfo.Size() != 0 {
+		t.Errorf("File was not empyty")
+	}
 }
