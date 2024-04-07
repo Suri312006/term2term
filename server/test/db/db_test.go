@@ -1,10 +1,11 @@
 package db_test
 
 import (
+	"encoding/json"
 	"os"
+	"reflect"
 	"testing"
 
-	"github.com/suri312006/term2term/v2/internal/db"
 	Db "github.com/suri312006/term2term/v2/internal/db"
 )
 
@@ -36,9 +37,9 @@ func TestNew(t *testing.T) {
 }
 
 func TestDeleteDb(t *testing.T) {
-	t.Run("checks if database is deleted after method call", func(t *testing.T) {
+	t.Run("checks if database can delete itself", func(t *testing.T) {
 
-		db := db.New(testDbFilePath)
+		db := Db.New(testDbFilePath)
 
 		db.DeleteDb()
 
@@ -53,6 +54,37 @@ func TestDeleteDb(t *testing.T) {
 
 func TestInsertDB(t *testing.T) {
 	t.Run("Asserts that you can enter data into db", func(t *testing.T) {
+
+		db := Db.New(testDbFilePath)
+		defer db.DeleteDb()
+
+		testData := Db.Entry{
+			Author:    "me",
+			Message:   "penis",
+			Recipient: "you",
+		}
+
+		db.InsertDB(testData)
+
+		file, err := os.Open(testDbFilePath)
+
+		if err != nil {
+			panic(err)
+		}
+
+		dec := json.NewDecoder(file)
+
+		encodedData := Db.Entry{}
+
+		err = dec.Decode(&encodedData)
+
+		if err != nil {
+			panic(err)
+		}
+
+		if !reflect.DeepEqual(testData, encodedData) {
+			t.Errorf("got %v wanted %v", encodedData, testData)
+		}
 
 	})
 }
