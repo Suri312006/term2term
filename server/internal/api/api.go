@@ -33,8 +33,10 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func get(w http.ResponseWriter, r *http.Request) {
+
 	fmt.Fprintf(w, "hi albert pookie!!!")
 	w.WriteHeader(http.StatusOK)
+
 }
 
 func post(w http.ResponseWriter, r *http.Request) {
