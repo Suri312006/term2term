@@ -19,7 +19,6 @@ func TestNew(t *testing.T) {
 		if err != nil {
 			println(err)
 		}
-
 		db := Db.New(testDbFilePath)
 		defer db.DeleteDb()
 
@@ -50,6 +49,7 @@ func TestInsertDB(t *testing.T) {
 		defer db.DeleteDb()
 
 		testData := Db.Entry{
+			Id:        "12345",
 			Author:    "me",
 			Message:   "penis",
 			Recipient: "you",
@@ -57,16 +57,38 @@ func TestInsertDB(t *testing.T) {
 
 		db.InsertDB(testData)
 
-		file := openDb(t)
-
-		verifyFileContents(t, file, testData)
+		verifyDbContents(t, testData)
 
 	})
 }
 
-func verifyFileContents(t testing.TB, file *os.File, want Db.Entry) {
+func TestGetEntry(t *testing.T) {
+	t.Run("Asserts that you can retreive an entry from an ID", func(t *testing.T) {
+		db := Db.New(testDbFilePath)
 
+		testData := Db.Entry{
+			Id:        "12345",
+			Author:    "me",
+			Message:   "penis",
+			Recipient: "you",
+		}
+
+		db.InsertDB(testData)
+
+		data, _ := db.GetEntryById("12345")
+
+		if !reflect.DeepEqual(data, testData) {
+			t.Errorf("got %v wanted %v", data, testData)
+		}
+
+
+	})
+}
+
+func verifyDbContents(t testing.TB, want Db.Entry) {
 	t.Helper()
+
+	file := openDb(t)
 
 	dec := json.NewDecoder(file)
 
@@ -85,6 +107,8 @@ func verifyFileContents(t testing.TB, file *os.File, want Db.Entry) {
 }
 
 func openDb(t testing.TB) *os.File {
+
+	t.Helper()
 
 	file, err := os.Open(testDbFilePath)
 

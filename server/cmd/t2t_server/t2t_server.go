@@ -9,7 +9,10 @@ import (
 
 const dbFilePath = "/home/suri/coding/term2term/server/internal/db/db.json"
 
-func main(){
-    server := api.Server{}
+func main() {
+	server := api.Server{}
 	log.Fatal(http.ListenAndServe(":6969", server))
+	
+
+	
 }
