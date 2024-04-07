@@ -6,14 +6,15 @@ import "os"
 
 //TODO: create a local database for now that can store user and messages
 
-type Db = struct {
+type Db struct {
 	Filepath string
 	file     *os.File
 }
 
+
 func New(filePath string) Db {
 	file, err := os.Create(filePath)
-    defer file.Close()
+	defer file.Close()
 
 	if err != nil {
 		panic("was not able to create database file")
@@ -22,7 +23,9 @@ func New(filePath string) Db {
 		file: file}
 
 }
-
-func ReadData(){
-
+func (d Db) DeleteDb() {
+	err := os.Remove(d.Filepath)
+	if err != nil {
+		panic("Unable to delete databse")
+	}
 }
