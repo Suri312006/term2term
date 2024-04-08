@@ -2,6 +2,7 @@ package listen
 
 import (
 	// "encoding/json"
+	"encoding/json"
 	"fmt"
 	// "log"
 	"net/http"
@@ -41,10 +42,18 @@ func get(w http.ResponseWriter, r *http.Request) {
 
 func post(w http.ResponseWriter, r *http.Request) {
 
-	r.ParseForm()
+	var data map[string]interface{}
 
-	for k, v := range r.Form {
-		fmt.Printf("%s = %s \n", k, v)
+	enc := json.NewDecoder(r.Body)
+
+	err := enc.Decode(&data)
+
+	if err != nil {
+		panic(err)
+	}
+
+	for k, v := range data {
+		fmt.Printf("%v = %v", k, v)
 	}
 
 	w.WriteHeader(http.StatusAccepted)
