@@ -24,12 +24,11 @@ pub fn run(args: Args) {
 }
 
 impl Client {
-
     // sends message to backend that sends args
     pub fn send_message(&self) -> Result<(), Box<dyn Error>> {
         let mut map = HashMap::new();
 
-        map.insert(&self.args.recipient , &self.args.message);
+        map.insert(&self.args.recipient, &self.args.message);
 
         let res = match self
             .client
@@ -48,7 +47,6 @@ impl Client {
 
     // new client
     pub fn new(args: Args) -> Client {
-
         dotenv().ok();
 
         let server_address =

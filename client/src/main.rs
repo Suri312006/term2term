@@ -1,4 +1,3 @@
-
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -13,15 +12,13 @@ pub struct Cli {
     recipient: String,
 }
 
-
 fn main() {
-
     let cli = Cli::parse();
 
     // handle parsing / configuration options
-    let args = client::Args{
-       message: cli.message,
-       recipient: cli.recipient,
+    let args = client::Args {
+        message: cli.message,
+        recipient: cli.recipient,
     };
 
     client::run(args);
