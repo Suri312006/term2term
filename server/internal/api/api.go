@@ -53,7 +53,7 @@ func post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for k, v := range data {
-		fmt.Printf("%v = %v", k, v)
+		fmt.Printf("%v = %v\n", k, v)
 	}
 
 	w.WriteHeader(http.StatusAccepted)
