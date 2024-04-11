@@ -3,37 +3,33 @@ use core::panic;
 use dotenv::dotenv;
 use std::{collections::HashMap, error::Error};
 
+// TODO: rename this to something better later on
 pub struct Args {
     pub message: String,
 
     pub recipient: String,
 }
 
+//TODO: we are creating a new client for pretty much every single new request
 pub struct Client {
     server_address: String,
     client: reqwest::blocking::Client,
     args: Args,
 }
 
+// run fuction that contains library run code
 pub fn run(args: Args) {
     let client = Client::new(args);
     let _ = client.send_message();
 }
 
-// defining methods on client
 impl Client {
-    pub fn send_request(&self) -> Result<(), Box<dyn Error>> {
-        let body = self.client.get(self.server_address.as_str()).send()?.text();
 
-        println!("{:#?}", body);
-
-        Ok(())
-    }
-
+    // sends message to backend that sends args
     pub fn send_message(&self) -> Result<(), Box<dyn Error>> {
         let mut map = HashMap::new();
 
-        map.insert(self.args.recipient.as_str(), self.args.message.as_str());
+        map.insert(&self.args.recipient , &self.args.message);
 
         let res = match self
             .client
@@ -45,14 +41,14 @@ impl Client {
             Err(err) => panic!("Error: {}", err),
         };
 
-        // .body(body)
-        // .send()?;
         println!("{:#?}", res);
 
         Ok(())
     }
 
+    // new client
     pub fn new(args: Args) -> Client {
+
         dotenv().ok();
 
         let server_address =
