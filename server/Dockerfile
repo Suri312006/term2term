@@ -26,5 +26,17 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /t2tServer
 # Expose port 8080 for incoming traffic
 EXPOSE 8080 5432
 
+#TODO: need to do the following for env vars
+
+# Specify the variable you need
+ARG  DBSTRING
+# Use the varible
+RUN export DBSTRING=$DBSTRING
+
+# Specify the variable you need
+ARG  PORT
+# Use the varible
+RUN export PORT=$PORT
+
 # Command to run the executable when the container starts
 CMD ["/t2tServer"]
