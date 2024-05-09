@@ -33,7 +33,7 @@ func Source() Env {
 func find(envVar string) string {
 	val, found := os.LookupEnv(envVar)
 	if !found {
-		panic(envVar + " not found." + val)
+		panic(envVar + " not found.")
 	}
 
 	return val
