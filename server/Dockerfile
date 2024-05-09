@@ -4,7 +4,7 @@ FROM golang:1.22
 WORKDIR /app
 
 # Copy the entire project directory into the container
-COPY . .
+COPY . ./
 
 RUN pwd
 
@@ -13,12 +13,16 @@ RUN ls
 ENV GO111MODULE=on
 ENV GOPROXY=https://proxy.golang.org
 
-WORKDIR /app/server
+WORKDIR /app
 # Run go mod download to download dependencies
 RUN go mod download
 
+RUN ls /app/internal/apiserver
+
+RUN ls /app/cmd/t2tServer
+
 # Change working directory to the directory containing the main package
-WORKDIR /app/server/cmd/t2tServer/
+WORKDIR /app/cmd/t2tServer
 
 # Build the Go binary
 RUN CGO_ENABLED=0 GOOS=linux go build -o /t2tServer

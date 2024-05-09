@@ -21,7 +21,7 @@ func Source() Env {
 
 	port = ":" + port
 
-	dbstring := find("DBSTRING")
+	dbstring := find("DATABASE_POOLER_URL")
 
 	return Env{
 		Port:     port,
