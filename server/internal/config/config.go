@@ -17,6 +17,8 @@ func Source() Env {
 
 	port := find("PORT")
 
+    
+
 	port = ":" + port
 
 	dbstring := find("DBSTRING")
@@ -31,7 +33,7 @@ func Source() Env {
 func find(envVar string) string {
 	val, found := os.LookupEnv(envVar)
 	if !found {
-		panic(envVar + " not found.")
+		panic(envVar + " not found." + val)
 	}
 
 	return val
