@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 	"github.com/suri312006/term2term/v2/internal/config"
 	"github.com/suri312006/term2term/v2/internal/db"
@@ -16,7 +17,7 @@ type ApiServer struct {
 func Init(ec config.Env, db db.Dbm) ApiServer {
 	e := echo.New()
 	e.Logger.SetLevel(log.INFO)
-	
+	e.Use(middleware.Logger())
 	return ApiServer{
 		e,
 		db,
