@@ -25,18 +25,15 @@ pub fn run(args: Args) {
 }
 
 impl Client {
-
     pub fn test_connection(&self) -> Result<(), Box<dyn Error>> {
         let res = match self.client.get(self.server_address.as_str()).send() {
             Ok(res) => res.text().unwrap(),
-            Err(err) => panic!("Error: {}", err)
-            
+            Err(err) => panic!("Error: {}", err),
         };
 
         println!("{:#?}", res);
 
         Ok(())
-
     }
     // sends message to backend that sends args
     pub fn send_message(&self) -> Result<(), Box<dyn Error>> {
@@ -54,7 +51,7 @@ impl Client {
             Err(err) => panic!("Error: {}", err),
         };
 
-        println!("{:#?}", res);
+        println!("{}", res);
 
         Ok(())
     }
