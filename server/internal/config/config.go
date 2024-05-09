@@ -17,8 +17,6 @@ func Source() Env {
 
 	port := find("PORT")
 
-    
-
 	port = ":" + port
 
 	dbstring := find("DATABASE_POOLER_URL")
