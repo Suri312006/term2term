@@ -7,16 +7,28 @@ import (
 	"github.com/suri312006/term2term/v2/internal/db"
 )
 
-type ServerConfig struct {
-	Db db.Dbm
+type ApiServer struct {
+	e    *echo.Echo
+	db   db.Dbm
+	port string
 }
 
-var e *echo.Echo
-
-
-func Init(ec config.Env){
+func Init(ec config.Env, db db.Dbm) ApiServer {
 	e := echo.New()
 	e.Logger.SetLevel(log.INFO)
-	e.Logger.Fatal(e.Start(ec.Port))
+	return ApiServer{
+		e,
+		db,
+		ec.Port,
+	}
 }
 
+func (a ApiServer) Start() {
+
+	a.e.Logger.Fatal(a.e.Start(a.port))
+}
+
+func (a ApiServer) initRoutes() {
+
+	a.e.GET("/", a.welcome)
+}
