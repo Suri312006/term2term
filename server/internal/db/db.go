@@ -1,10 +1,31 @@
 package db
 
-type Message struct {
-	Id        string
-	Author    string
-	Recipient string
-	Body      string
+import (
+	"time"
+
+	"github.com/labstack/gommon/log"
+	"github.com/suri312006/term2term/v2/internal/config"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+
+// db manager
+type Dbm struct {
+	db *gorm.DB
 }
 
-//TODO:  this should be a wrapper around an sqlite database
+func Init(ec config.Env) Dbm {
+	db, err := gorm.Open(postgres.Open(ec.DBString), &gorm.Config{})
+	if err != nil {
+		log.Fatal("failed to connect database", err)
+	}
+	sqldb, err := db.DB()
+
+	//sets this on the underlying sql db
+	sqldb.SetMaxIdleConns(10)
+	sqldb.SetMaxOpenConns(100)
+	sqldb.SetConnMaxLifetime(time.Hour)
+
+	return Dbm{db}
+
+}
