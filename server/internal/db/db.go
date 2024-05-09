@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/labstack/gommon/log"
@@ -34,11 +33,6 @@ func Init(ec config.Env) Dbm {
 // m for manager
 func (m Dbm) PingTime() time.Time {
 	var now time.Time
-	// _ = c.db.QueryRow(c.ctx, "SELECT NOW()").Scan(&now)
 	_ = m.db.Raw("SELECT NOW()").Scan(&now)
-	// if err != nil {
-	// 	log.Fatal("failed to execute query", err)
-	// }
-	fmt.Println(now)
 	return now
 }

@@ -16,6 +16,7 @@ type ApiServer struct {
 func Init(ec config.Env, db db.Dbm) ApiServer {
 	e := echo.New()
 	e.Logger.SetLevel(log.INFO)
+	
 	return ApiServer{
 		e,
 		db,
@@ -24,6 +25,7 @@ func Init(ec config.Env, db db.Dbm) ApiServer {
 }
 
 func (a ApiServer) Start() {
+	a.initRoutes()
 
 	a.e.Logger.Fatal(a.e.Start(a.port))
 }

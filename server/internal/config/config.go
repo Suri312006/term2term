@@ -16,6 +16,9 @@ func Source() Env {
 	godotenv.Load("../../../.env")
 
 	port := find("PORT")
+
+	port = ":" + port
+
 	dbstring := find("DBSTRING")
 
 	return Env{
