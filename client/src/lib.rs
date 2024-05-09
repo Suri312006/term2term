@@ -20,10 +20,24 @@ pub struct Client {
 // run fuction that contains library run code
 pub fn run(args: Args) {
     let client = Client::new(args);
+    let _ = client.test_connection();
     let _ = client.send_message();
 }
 
 impl Client {
+
+    pub fn test_connection(&self) -> Result<(), Box<dyn Error>> {
+        let res = match self.client.get(self.server_address.as_str()).send() {
+            Ok(res) => res.text().unwrap(),
+            Err(err) => panic!("Error: {}", err)
+            
+        };
+
+        println!("{:#?}", res);
+
+        Ok(())
+
+    }
     // sends message to backend that sends args
     pub fn send_message(&self) -> Result<(), Box<dyn Error>> {
         let mut map = HashMap::new();
@@ -50,7 +64,7 @@ impl Client {
         dotenv().ok();
 
         let server_address =
-            std::env::var("SERVER_HOST_ADDRESS").expect("SERVER_HOST_ADDRESS not in .env file");
+            std::env::var("PUBLIC_SERVER_URL").expect("SERVER_HOST_ADDRESS not in .env file");
 
         let client = reqwest::blocking::Client::new();
 
