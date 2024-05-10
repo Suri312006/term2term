@@ -1,16 +1,14 @@
 // send something to server
 use core::panic;
-use dotenv::dotenv;
 use std::{collections::HashMap, error::Error};
 
-// TODO: rename this to something better later on
 pub struct Args {
     pub message: String,
 
+    pub server_address: String,
     pub recipient: String,
 }
 
-//TODO: we are creating a new client for pretty much every single new request
 pub struct Client {
     server_address: String,
     client: reqwest::blocking::Client,
@@ -58,15 +56,11 @@ impl Client {
 
     // new client
     pub fn new(args: Args) -> Client {
-        dotenv().ok();
-
-        let server_address =
-            std::env::var("PUBLIC_SERVER_URL").expect("SERVER_HOST_ADDRESS not in .env file");
 
         let client = reqwest::blocking::Client::new();
 
         return Client {
-            server_address,
+            server_address: args.server_address.clone(),
             client,
             args,
         };
