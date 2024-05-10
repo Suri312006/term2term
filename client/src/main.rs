@@ -1,40 +1,53 @@
-use std::os;
+use crossterm::{
+    event::{self, KeyCode, KeyEventKind},
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    ExecutableCommand,
+};
+use ratatui::{
+    prelude::{CrosstermBackend, Stylize, Terminal},
+    widgets::Paragraph,
+};
+use std::{
+    io::{stdout, Result},
+    task::Wake, vec,
+};
 
-use clap::Parser;
-use dotenv::dotenv;
+fn main() -> Result<()> {
+    stdout().execute(EnterAlternateScreen);
 
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-pub struct Cli {
-    // short and long just means that theres a -m, --message
-    #[arg(short, long)]
-    message: String,
+    enable_raw_mode();
 
-    // recipient
-    #[arg(short, long)]
-    recipient: String,
+    let mut term = Terminal::new(CrosstermBackend::new(stdout()))?;
 
-    #[arg(short, long, default_value_t = false)]
-    use_server: bool,
-}
+    term.clear();
 
-fn main() {
-    dotenv().ok();
+    //TODO: main loop
+    loop {
+        term.draw(|frame| {
+            let area = frame.size();
 
-    let server_address = std::env::var("PUBLIC_SERVER_URL").expect("PUBLIC_SERVER_URL was not found in server.");
+            frame.render_widget(
+                Paragraph::new("Hello alb!, press Q to quit")
+                    .white()
+                    .on_black(),
+                area,
+            );
+        })?;
 
-    let cli = Cli::parse();
+        if event::poll(std::time::Duration::from_millis(16))? {
+            if let event::Event::Key(key) = event::read()? {
+                if key.kind == KeyEventKind::Press
+                    && key.code == KeyCode::Char('Q')
+                {
+                    break;
+                }
+            }
+        }
+    }
 
-    // handle parsing / configuration options
-    let args = client::Args {
-        message: cli.message,
-        recipient: cli.recipient,
-        server_address: if cli.use_server {
-            server_address
-        } else {
-            String::from("http://localhost:8080/")
-        },
-    };
+    stdout().execute(LeaveAlternateScreen)?;
 
-    client::run(args);
+    disable_raw_mode()?;
+
+    Ok(())
 }

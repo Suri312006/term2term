@@ -4,7 +4,6 @@ use std::{collections::HashMap, error::Error};
 
 pub struct Args {
     pub message: String,
-
     pub server_address: String,
     pub recipient: String,
 }

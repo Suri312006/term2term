@@ -34,4 +34,5 @@ func (a ApiServer) Start() {
 func (a ApiServer) initRoutes() {
 
 	a.e.GET("/", a.welcome)
+
 }
