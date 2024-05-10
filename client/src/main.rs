@@ -8,7 +8,6 @@ use ratatui::{
 };
 mod tui;
 
-
 #[derive(Debug, Default)]
 pub struct App {
     counter: u8,
@@ -16,7 +15,7 @@ pub struct App {
 }
 
 impl App {
-    pub fn run(&mut self, term: &mut tui::Tui) -> io::Result<()>{
+    pub fn run(&mut self, term: &mut tui::Tui) -> io::Result<()> {
         while !self.exit {
             term.draw(|frame| self.render_frame(frame))?;
             self.handle_events()?;
@@ -28,11 +27,42 @@ impl App {
         frame.render_widget(self, frame.size());
     }
 
-    fn handle_events(&mut self) -> io::Result<()>{
-        todo!()
+    fn handle_events(&mut self) -> io::Result<()> {
+        // blocks until there is an event to be had
+        match event::read()? {
+            Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
+                self.handle_key_event(key_event)
+            }
+            _ => {}
+        };
+        // important to check if a key press event happens
+        //
+        //
+        //
+        Ok(())
     }
-}
 
+    fn handle_key_event(&mut self, key_event: KeyEvent) {
+        match key_event.code {
+            KeyCode::Char('q') => self.exit(),
+            KeyCode::Left => self.decrement_counter(),
+            KeyCode::Right => self.increment_counter(),
+            _ => {}
+        }
+    }
+
+    fn exit(&mut self){
+        self.exit = true;
+    }
+
+    fn increment_counter(&mut self){
+        self.counter += 1;
+    }
+    fn decrement_counter(&mut self){
+        self.counter -= 1;
+    }
+
+}
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
@@ -65,15 +95,12 @@ impl Widget for &App {
             .block(block)
             .render(area, buf);
     }
-
 }
-
-
 
 fn main() -> io::Result<()> {
     let mut term = tui::init()?;
     let app_result = App::default().run(&mut term);
-    tui::restore(); 
+    tui::restore();
     app_result
 }
 
@@ -107,4 +134,22 @@ mod tests {
         // compare buffers and display the differences in a more readable way
         assert_eq!(buf, expected);
     }
+
+    #[test]
+    fn handle_key_event() -> io::Result<()>{
+        let mut app = App::default();
+
+        app.handle_key_event(KeyCode::Right.into());
+        assert_eq!(app.counter, 1);
+
+        app.handle_key_event(KeyCode::Left.into());
+        assert_eq!(app.counter, 0);
+
+        app.handle_key_event(KeyCode::Char('q').into());
+        assert_eq!(app.exit, true);
+
+        Ok(())
+    }
 }
+
+
