@@ -2,6 +2,8 @@ use clap::Parser;
 // simple greeter
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
+
+//TODO: figure out what args we need for our platform
 struct Args {
     //Name of greetee
     #[arg(short, long)]
