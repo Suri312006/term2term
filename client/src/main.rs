@@ -54,7 +54,7 @@ fn main() {
     let args = Args::parse();
 
     match args.cmd {
-        Commands::Init {} => println!("Initializing!"),
+        Commands::Init {} => t2t_client::initialize(),
         Commands::Send { message, recepient } => println!("Sending {} to {}", message, recepient),
 
         Commands::List {
