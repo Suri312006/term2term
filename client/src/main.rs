@@ -18,8 +18,10 @@ struct Args {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
+    /// Initializes your Term2Term account.
     Init {},
 
+    /// Send a message.
     Send {
         #[arg(short, long)]
         message: String,
@@ -28,6 +30,7 @@ enum Commands {
         recepient: String,
     },
 
+    /// List various aspects within the service.
     List {
         #[arg(short, long)]
         conversations: bool,
@@ -42,6 +45,7 @@ enum Commands {
         notifications: bool,
     },
 
+    /// Search various aspects within the service.
     Search {
         #[arg(short, long)]
         messages: String,
