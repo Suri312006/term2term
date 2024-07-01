@@ -6,7 +6,7 @@ send (sub command)
 
 list (sub command)
 - all users
-- friends
+- conversations
 - notifications
 
 Search (sub command)
