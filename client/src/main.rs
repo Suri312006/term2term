@@ -2,16 +2,8 @@ use clap::{Parser, Subcommand};
 // simple greeter
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
-
 //TODO: figure out what args we need for our platform
 struct Args {
-    //Name of greetee
-    // #[arg(short, long)]
-    // name: String,
-    //
-    // //Number of times
-    // #[arg(short, long, default_value_t = 1)]
-    // count: u64,
     #[command(subcommand)]
     cmd: Commands,
 }
@@ -61,7 +53,20 @@ enum Commands {
 fn main() {
     let args = Args::parse();
 
-    // for _ in 0..args.count {
-    //     println!("Hello {}", args.name);
-    // }
+    match args.cmd {
+        Commands::Init {} => println!("Initializing!"),
+        Commands::Send { message, recepient } => println!("Sending {} to {}", message, recepient),
+
+        Commands::List {
+            conversations,
+            friends,
+            users,
+            notifications,
+        } => println!("Listing!"),
+        Commands::Search {
+            messages,
+            friends,
+            users,
+        } => println!("Searching!"),
+    }
 }
