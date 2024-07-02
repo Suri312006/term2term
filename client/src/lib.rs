@@ -1,8 +1,5 @@
-use core::fmt;
 use std::{
-    fs::{create_dir, File},
-    io::{self, ErrorKind, Write},
-    str::FromStr,
+    fs::{create_dir, File}, io::{self, ErrorKind, Write}, process::exit, str::FromStr
 };
 
 use xdg_home::home_dir;
@@ -13,15 +10,11 @@ pub fn initialize() {
 
     let home_path = home_dir().expect(err_msg);
 
-    println!("{}", home_path.to_str().expect("Bad unicode in HOME path."));
-
     let config_dir_path = String::from_str(home_path.to_str().expect("Something went wrong"))
         .unwrap()
         + "/.config/term2term";
 
     let config_file_path = config_dir_path.clone() + "/config.toml";
-
-    // if the file already exists, we dont wanna overwrite it
 
     match File::open(&config_file_path) {
         Ok(_) => {
@@ -29,14 +22,17 @@ pub fn initialize() {
             println!("Found existing config file!");
         }
         Err(err) => {
-            // file doesnt exist, we need to create the default one
+            if err.kind() != ErrorKind::NotFound {
+                // we dont like this!!
 
-            println!("{}", &config_dir_path);
+                panic!(" Weird error. {}", err);
+            }
             match create_dir(&config_dir_path) {
                 Ok(()) => {}
                 Err(err) => {
                     if err.kind() != ErrorKind::AlreadyExists {
-                        eprintln!("Something went wrong with creating directory for config file.")
+                        eprintln!("Something went wrong with creating directory for config file.");
+                        exit(1);
                     }
                 }
             }
@@ -54,6 +50,7 @@ pub fn initialize() {
                 .expect("Error reading user input.");
 
             //TODO: Themes? and yeah thats kind of everything we need
+            // and we need the call to get the key for each user?
 
             #[rustfmt::skip]
             let config_file_contents = format!(
@@ -67,6 +64,10 @@ key = \"\"",
             config_file
                 .write_all(config_file_contents.as_bytes())
                 .expect("Something went wrong writing default config file.");
+
+            println!("Config file written to {}", config_file_path);
         }
     }
+
+    println!("Initialization Success!")
 }
