@@ -69,6 +69,4 @@ fn main() {
             users,
         } => println!("Searching!"),
     }
-
-
 }
