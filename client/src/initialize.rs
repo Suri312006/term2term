@@ -30,6 +30,11 @@ pub fn gather_paths() -> Paths {
     }
 }
 
+fn register_new_user(username: String) -> String{
+
+}
+
+
 pub fn initialize(username: String) -> Result<(), Box<dyn Error>> {
     // check if the config flie already exists
     // if it doesnt, remove the file

@@ -35,4 +35,7 @@ func (a ApiServer) initRoutes() {
 
 	a.e.GET("/", a.welcome)
 
+	a.e.POST("/user/register", a.registerUser)
+
 }
+
