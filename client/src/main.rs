@@ -1,15 +1,16 @@
 use clap::{Parser, Subcommand};
+
 // simple greeter
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 //TODO: figure out what args we need for our platform
-struct Args {
+pub struct Args {
     #[command(subcommand)]
     cmd: Commands,
 }
 
 #[derive(Subcommand, Debug)]
-enum Commands {
+pub enum Commands {
     /// Initializes your Term2Term account.
     Init {},
 
@@ -50,23 +51,7 @@ enum Commands {
     },
 }
 
+mod cli;
 fn main() {
-    let args = Args::parse();
-
-    match args.cmd {
-        Commands::Init {} => println!("Initializing!"),
-        Commands::Send { message, recepient } => println!("Sending {} to {}", message, recepient),
-
-        Commands::List {
-            conversations,
-            friends,
-            users,
-            notifications,
-        } => println!("Listing!"),
-        Commands::Search {
-            messages,
-            friends,
-            users,
-        } => println!("Searching!"),
-    }
+    cli::run(Args::parse());
 }

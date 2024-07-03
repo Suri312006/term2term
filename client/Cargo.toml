@@ -1,5 +1,5 @@
 [package]
-name = "client"
+name = "t2t"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,3 +7,7 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.5.7", features = ["derive"] }
+keyring = "2.3.3"
+reqwest = { version = "0.12.5", features = ["blocking", "json"] }
+serde = { version = "1.0.203", features = ["derive"] }
+xdg-home = "1.2.0"
