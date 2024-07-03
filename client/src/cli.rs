@@ -38,7 +38,7 @@ pub fn initialize() {
                 .read_line(&mut username)
                 .expect("Error reading user input.");
 
-            init::initialize(username).unwrap();
+            init::initialize(username.trim().to_string()).unwrap();
             println!(
                 "Config file written to {}",
                 paths.config_file_path.to_str().unwrap()

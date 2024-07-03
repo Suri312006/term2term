@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/labstack/gommon/log"
@@ -35,6 +36,7 @@ func Init(ec config.Env) Dbm {
 func (m Dbm) PingTime() time.Time {
 	var now time.Time
 	_ = m.db.Raw("SELECT NOW()").Scan(&now)
+	fmt.Println(now)
 	return now
 }
 

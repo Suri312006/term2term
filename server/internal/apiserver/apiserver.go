@@ -28,6 +28,7 @@ func Init(ec config.Env, db db.Dbm) ApiServer {
 func (a ApiServer) Start() {
 	a.initRoutes()
 
+	a.db.PingTime()
 	a.e.Logger.Fatal(a.e.Start(a.port))
 }
 
@@ -38,4 +39,3 @@ func (a ApiServer) initRoutes() {
 	a.e.POST("/user/register", a.registerUser)
 
 }
-

@@ -14,3 +14,13 @@ type User struct {
 	PublicId string `json:"id" gorm:"uniqueIndex"`
 	Username string `json:"username"`
 }
+
+func (m Dbm) UpdateSchema() {
+	m.db.AutoMigrate(&User{})
+}
+
+func (m Dbm) ResetSchema() {
+	m.db.Migrator().DropTable(&User{})
+	m.db.AutoMigrate(&User{})
+
+}

@@ -23,12 +23,14 @@ func (a ApiServer) welcome(c echo.Context) error {
 
 func (a ApiServer) registerUser(c echo.Context) error {
 
+	user_id := id.Must()
+
 	user := db.User{
-		PublicId: id.Must(),
+		PublicId: user_id,
 		Username: c.FormValue("username"),
 	}
 
 	a.db.Save(&user)
 
-	return nil
+	return c.JSON(http.StatusOK, user)
 }
