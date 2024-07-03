@@ -144,7 +144,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "t2t_client"
+name = "t2t"
 version = "0.1.0"
 dependencies = [
  "clap",

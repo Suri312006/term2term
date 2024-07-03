@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+
 // simple greeter
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -52,22 +53,5 @@ pub enum Commands {
 
 mod cli;
 fn main() {
-    let args = Args::parse();
-
-    match args.cmd {
-        Commands::Init {} => t2t_client::initialize(),
-        Commands::Send { message, recepient } => println!("Sending {} to {}", message, recepient),
-
-        Commands::List {
-            conversations,
-            friends,
-            users,
-            notifications,
-        } => println!("Listing!"),
-        Commands::Search {
-            messages,
-            friends,
-            users,
-        } => println!("Searching!"),
-    }
+    cli::run(Args::parse());
 }
