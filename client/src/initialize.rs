@@ -35,33 +35,20 @@ pub fn initialize(username: String) -> Result<(), Box<dyn Error>> {
     // if it doesnt, remove the file
     let paths = gather_paths();
 
-    match File::open(&paths.config_file_path) {
-        Ok(_) => {
-            // ok so the file already exists
-        }
-        Err(err) => {
-            if err.kind() != ErrorKind::NotFound {
-                // we dont like this!!
-                return Err(Box::new(err));
-            }
-
-            match create_dir(paths.config_dir_path) {
-                Ok(()) => {}
-                Err(err) => {
-                    if err.kind() != ErrorKind::AlreadyExists {
-                        return Err(Box::new(err));
-                    }
+    if !check_existing_config(&paths)? {
+        match create_dir(paths.config_dir_path) {
+            Ok(()) => {}
+            Err(err) => {
+                if err.kind() != ErrorKind::AlreadyExists {
+                    return Err(Box::new(err));
                 }
             }
+        }
 
-            let mut config_file = File::create(&paths.config_file_path)
-                .expect("Something went wrong with creating default config file.");
+        let mut config_file = File::create(&paths.config_file_path)?;
 
-            //TODO: Themes? and yeah thats kind of everything we need
-            // and we need the call to get the key for each user?
-
-            #[rustfmt::skip]
-            let config_file_contents = format!(
+        #[rustfmt::skip]
+            let default_cfg = format!(
                 "theme = \"Default\"
 [User] 
 name = \"{}\"
@@ -69,11 +56,9 @@ key = \"\"",
                 username.trim()
             );
 
-            config_file
-                .write_all(config_file_contents.as_bytes())
-                .expect("Something went wrong writing default config file.");
-        }
+        config_file.write_all(default_cfg.as_bytes())?
     }
+
     Ok(())
 }
 
