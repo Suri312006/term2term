@@ -59,11 +59,8 @@ pub fn initialize(username: String) -> Result<(), Box<dyn Error>> {
     // if it doesnt, remove the file
     let paths = gather_paths();
 
-    //TODO: need to parse config
-    let user = "suri31";
-
     if !check_existing_config(&paths)? {
-        match create_dir(paths.config_dir_path) {
+        match create_dir(&paths.config_dir_path) {
             Ok(()) => {}
             Err(err) => {
                 if err.kind() != ErrorKind::AlreadyExists {
@@ -76,20 +73,18 @@ pub fn initialize(username: String) -> Result<(), Box<dyn Error>> {
 
         let entry = Entry::new("term2term", new_user.username.as_str()).unwrap();
 
-        entry.set_password(&new_user.id);
+        let _ = entry.set_password(&new_user.id).unwrap();
 
         let mut config_file = File::create(&paths.config_file_path)?;
 
         #[rustfmt::skip]
             let default_cfg = format!(
                 "theme = \"Default\"
-[User] 
+[user] 
 # Do Not Change This Manually.                    
-name = \"{}\"",
+username = \"{}\"",
                 username,
             );
-
-        println!("got from keyring:{}", entry.get_password().unwrap());
 
         config_file.write_all(default_cfg.as_bytes());
     } else {
@@ -97,6 +92,10 @@ name = \"{}\"",
         println!("read from store:{}", entry.get_password().unwrap());
         // we can validate that the existing user is correct?
     }
+
+    // now we can check if the written file can be parsed, just to make sure.
+    //
+    let _ = crate::config::Config::parse(paths);
 
     Ok(())
 }
