@@ -5,19 +5,14 @@ use std::{
     str::FromStr,
 };
 
-use super::Paths;
+use crate::api;
 
-use serde::Deserialize;
+use super::Paths;
+use super::UserInfo;
 
 use keyring::Entry;
 
 use anyhow::{anyhow, Context, Result};
-
-#[derive(Deserialize)]
-struct UserInfo {
-    id: String,
-    username: String,
-}
 
 use xdg_home::home_dir;
 
@@ -41,21 +36,6 @@ pub fn gather_paths() -> Paths {
     }
 }
 
-fn register_new_user(username: &String) -> UserInfo {
-    // This will POST a body of `foo=bar&baz=quux`
-    let params = [("username", username.to_string())];
-    let client = reqwest::blocking::Client::new();
-    let res = client
-        .post("https://t2tserver.fly.dev/user/register")
-        // .post("http://localhost:8080/user/register")
-        .form(&params)
-        .send()
-        .unwrap();
-    let x: UserInfo = res.json().unwrap();
-
-    return x;
-}
-
 pub fn initialize(username: String) -> Result<()> {
     // check if the config flie already exists
     // if it doesnt, remove the file
@@ -73,7 +53,7 @@ pub fn initialize(username: String) -> Result<()> {
             }
         }
 
-        let new_user = register_new_user(&username);
+        let new_user = api::register_new_user(&username);
 
         let entry = Entry::new("term2term", new_user.username.as_str()).unwrap();
 
