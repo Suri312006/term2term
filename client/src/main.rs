@@ -1,13 +1,12 @@
 use anyhow::Result;
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 
 // simple greeter
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
-//TODO: figure out what args we need for our platform
-pub struct Args {
+pub struct Cli {
     #[command(subcommand)]
-    cmd: Commands,
+    command: Commands,
 }
 
 #[derive(Subcommand, Debug)]
@@ -25,36 +24,59 @@ pub enum Commands {
     },
 
     /// List various aspects within the service.
-    List {
-        #[arg(short, long)]
-        conversations: bool,
-
-        #[arg(short, long)]
-        friends: bool,
-
-        #[arg(short, long)]
-        users: bool,
-
-        #[arg(short, long)]
-        notifications: bool,
-    },
+    List(ListArgs),
 
     /// Search various aspects within the service.
-    Search {
-        #[arg(short, long)]
-        messages: String,
+    Search(SearchArgs),
+}
 
-        #[arg(short, long)]
-        friends: String,
+#[derive(Debug, Args)]
+#[command(args_conflicts_with_subcommands = true)]
+pub struct ListArgs {
+    #[command(subcommand)]
+    command: ListVariants,
+}
 
+#[derive(Debug, Subcommand)]
+pub enum ListVariants {
+    Conversations,
+
+    Friends,
+
+    Users,
+
+    Notifications,
+}
+
+#[derive(Debug, Args)]
+#[command(args_conflicts_with_subcommands = true)]
+pub struct SearchArgs {
+    #[command(subcommand)]
+    command: SearchVariants,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum SearchVariants {
+    Messages {
         #[arg(short, long)]
-        users: String,
+        query: String,
+    },
+
+    Friends {
+        #[arg(short, long)]
+        query: String,
+    },
+
+    Users {
+        #[arg(short, long)]
+        query: String,
     },
 }
 
 mod cli;
 fn main() -> Result<()> {
-    cli::run(Args::parse())?;
+    let args = Cli::parse();
+    cli::run(args)?;
 
     Ok(())
 }

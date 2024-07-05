@@ -1,26 +1,26 @@
-use crate::{Args, Commands};
+use crate::{Cli, Commands, ListArgs, ListVariants, SearchVariants};
 
 use std::io;
 
 use anyhow::{Ok, Result};
 use t2t::initialize as init;
 
-pub fn run(args: Args) -> Result<()> {
-    match args.cmd {
+pub fn run(args: Cli) -> Result<()> {
+    match args.command {
         Commands::Init {} => initialize(),
         Commands::Send { message, recepient } => send(message, recepient),
 
-        Commands::List {
-            conversations,
-            friends,
-            users,
-            notifications,
-        } => list(conversations, friends, users, notifications),
-        Commands::Search {
-            messages,
-            friends,
-            users,
-        } => search(messages, friends, users),
+        Commands::List(listArgs) => match listArgs.command {
+            ListVariants::Conversations => Ok(()),
+            ListVariants::Friends => Ok(()),
+            ListVariants::Users => Ok(()),
+            ListVariants::Notifications => Ok(()),
+        },
+        Commands::Search(searchArgs) => match searchArgs.command {
+            SearchVariants::Messages { query } => Ok(()),
+            SearchVariants::Friends { query } => Ok(()),
+            SearchVariants::Users { query } => Ok(()),
+        },
     }
 }
 
