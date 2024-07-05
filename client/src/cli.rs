@@ -1,4 +1,4 @@
-use crate::{Cli, Commands, ListArgs, ListVariants, SearchVariants};
+use crate::{Cli, Commands, ListVariants, SearchVariants};
 
 use std::io;
 

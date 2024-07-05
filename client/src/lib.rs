@@ -1,5 +1,4 @@
 use std::path::PathBuf;
-use serde::Deserialize;
 
 pub mod api;
 pub mod config;
@@ -11,8 +10,3 @@ pub struct Paths {
     pub config_file_path: PathBuf,
 }
 
-#[derive(Deserialize)]
-pub struct UserInfo {
-    id: String,
-    username: String,
-}

@@ -5,15 +5,18 @@ use std::{
     str::FromStr,
 };
 
-use crate::api;
+use crate::{
+    api::{self, verify_user},
+    config::{self, Config},
+};
 
 use super::Paths;
-use super::UserInfo;
 
 use keyring::Entry;
 
 use anyhow::{anyhow, Context, Result};
 
+use serde::de::Error;
 use xdg_home::home_dir;
 
 pub fn gather_paths() -> Paths {
@@ -55,7 +58,7 @@ pub fn initialize(username: String) -> Result<()> {
 
         let new_user = api::register_new_user(&username);
 
-        let entry = Entry::new("term2term", new_user.username.as_str()).unwrap();
+        let entry = Entry::new("term2term", new_user.name.as_str()).unwrap();
 
         let _ = entry.set_password(&new_user.id).unwrap();
 
@@ -75,7 +78,14 @@ id = \"{}\"",
             .write_all(default_cfg.as_bytes())
             .with_context(|| format!("Unable to write to config file."))?;
     } else {
-        //TODO: we can validate that the existing user is correct? probably by api call?
+        let config = config::parse(paths)?;
+        let verified = verify_user(config.user)?;
+
+        if !verified {
+            return Err(anyhow!(
+                "User information is not correct, need to repair account"
+            ));
+        }
     }
 
     Ok(())
