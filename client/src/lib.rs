@@ -1,8 +1,10 @@
 use std::path::PathBuf;
 
 
-pub mod initialize;
 pub mod config;
+pub mod initialize;
+
+
 
 pub struct Paths {
     // do we really need these two?

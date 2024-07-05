@@ -27,7 +27,7 @@ func (a ApiServer) registerUser(c echo.Context) error {
 
 	user := db.User{
 		PublicId: user_id,
-		Username: c.FormValue("username"),
+		Name: c.FormValue("username"),
 	}
 
 	a.db.Save(&user)
