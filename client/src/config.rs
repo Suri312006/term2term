@@ -1,35 +1,46 @@
-use std::{fs::File, io::Read};
+use std::{
+    error::Error,
+    fs::File,
+    io::{self, Read},
+};
 
+use anyhow::{Context, Result};
+
+use keyring::Entry;
 use serde::Deserialize;
 
 use crate::Paths;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
-    theme: Theme,
-    user: User,
+    pub theme: Theme,
+    pub user: User,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct User {
-    username: String,
+    pub name: String,
+    pub id: String,
 }
 
 #[derive(Deserialize, Debug)]
-enum Theme {
+pub enum Theme {
     Default,
 }
 
 impl Config {
-    pub fn parse(paths: Paths) -> Config {
-        let mut cfg_file = File::open(paths.config_file_path).unwrap();
+    pub fn parse(paths: Paths) -> Result<Config> {
+        let mut cfg_file = File::open(paths.config_file_path)?;
         let mut buf = String::new();
-        cfg_file.read_to_string(&mut buf).unwrap();
+        cfg_file.read_to_string(&mut buf)?;
 
-        let config: Config = toml::from_str(buf.as_str()).unwrap();
+        let mut config: Config = toml::from_str(buf.as_str())
+            .with_context(|| format!("Unsupported structure for config file."))?;
 
-        println!("{:#?}", config);
+        let entry = Entry::new("term2term", config.user.name.as_str()).unwrap();
 
-        config
+        config.user.id = entry.get_password()?;
+
+        Ok(config)
     }
 }
