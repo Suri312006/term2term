@@ -2,28 +2,29 @@ use crate::{Args, Commands};
 
 use std::io;
 
+use anyhow::{Ok, Result};
 use t2t::initialize as init;
 
-pub fn run(args: Args) {
+pub fn run(args: Args) -> Result<()> {
     match args.cmd {
         Commands::Init {} => initialize(),
-        Commands::Send { message, recepient } => println!("Sending {} to {}", message, recepient),
+        Commands::Send { message, recepient } => send(message, recepient),
 
         Commands::List {
             conversations,
             friends,
             users,
             notifications,
-        } => println!("Listing!"),
+        } => list(conversations, friends, users, notifications),
         Commands::Search {
             messages,
             friends,
             users,
-        } => println!("Searching!"),
+        } => search(messages, friends, users),
     }
 }
 
-pub fn initialize() {
+fn initialize() -> Result<()> {
     println!("Starting Initialziation.");
 
     let mut username = String::new();
@@ -47,9 +48,21 @@ pub fn initialize() {
         false => {
             println!("Found existing config file.");
 
-            init::initialize(username).unwrap();
+            init::initialize(username)?;
         }
     }
 
-    println!("Initialization Success!")
+    println!("Initialization Success!");
+    Ok(())
+}
+
+fn send(message: String, recepient: String) -> Result<()> {
+    todo!()
+}
+
+fn list(conversations: bool, friends: bool, users: bool, notifications: bool) -> Result<()> {
+    todo!()
+}
+fn search(messages: String, friends: String, users: String) -> Result<()> {
+    todo!()
 }

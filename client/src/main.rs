@@ -1,3 +1,4 @@
+use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 // simple greeter
@@ -52,6 +53,8 @@ pub enum Commands {
 }
 
 mod cli;
-fn main() {
-    cli::run(Args::parse());
+fn main() -> Result<()> {
+    cli::run(Args::parse())?;
+
+    Ok(())
 }
