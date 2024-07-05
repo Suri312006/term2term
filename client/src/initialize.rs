@@ -46,7 +46,7 @@ fn register_new_user(username: &String) -> UserInfo {
     let params = [("username", username.to_string())];
     let client = reqwest::blocking::Client::new();
     let res = client
-        .post("http://localhost:8080/user/register")
+        .post("https://t2tserver.fly.dev/register")
         .form(&params)
         .send()
         .unwrap();
