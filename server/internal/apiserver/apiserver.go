@@ -38,4 +38,6 @@ func (a ApiServer) initRoutes() {
 
 	a.e.POST("/user/register", a.registerUser)
 
+	a.e.POST("/user/verify", a.verifyUser)
+
 }

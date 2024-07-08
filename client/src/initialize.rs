@@ -56,7 +56,7 @@ pub fn initialize(username: String) -> Result<()> {
             }
         }
 
-        let new_user = api::register_new_user(&username);
+        let new_user = api::register_new_user(&username)?;
 
         let entry = Entry::new("term2term", new_user.name.as_str()).unwrap();
 
