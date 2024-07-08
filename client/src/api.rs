@@ -45,4 +45,3 @@ pub fn verify_user(user: User) -> Result<bool> {
 
     Ok(x.verified)
 }
-

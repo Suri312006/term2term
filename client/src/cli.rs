@@ -26,7 +26,7 @@ pub fn run(args: Cli) -> Result<()> {
 }
 
 fn initialize() -> Result<()> {
-    println!("{}","Starting Initialziation.".green());
+    println!("{}", "Starting Initialziation.".green());
 
     let mut username = String::new();
 
@@ -53,12 +53,11 @@ fn initialize() -> Result<()> {
         }
     }
 
-    println!("{}","Initialization Success!".green());
+    println!("{}", "Initialization Success!".green());
     Ok(())
 }
 
 fn send(message: String, recepient: String) -> Result<()> {
-
     todo!()
 }
 

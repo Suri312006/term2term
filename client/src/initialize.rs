@@ -7,12 +7,10 @@ use std::{
 
 use crate::{
     api::{self, verify_user},
-    config
+    config,
 };
 
 use super::Paths;
-
-// use keyring::Entry;
 
 use anyhow::{anyhow, Context, Result};
 
@@ -56,10 +54,6 @@ pub fn initialize(username: String) -> Result<()> {
         }
 
         let new_user = api::register_new_user(&username)?;
-
-        // let entry = Entry::new("term2term", new_user.name.as_str()).unwrap();
-
-        // let _ = entry.set_password(&new_user.id).unwrap();
 
         let mut config_file = File::create(&paths.config_file_path)?;
 
