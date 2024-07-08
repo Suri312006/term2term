@@ -30,11 +30,10 @@ func (a ApiServer) registerUser(c echo.Context) error {
 		Name:     c.FormValue("name"),
 	}
 
-	a.db.Save(&user)
-// if err != nil {
-// 	panic(err)	 
-// 	}
-
+	err := a.db.Save(&user)
+	if err != nil {
+		panic(err)
+	}
 
 	return c.JSON(http.StatusOK, user)
 }
@@ -49,15 +48,11 @@ func (a ApiServer) verifyUser(c echo.Context) error {
 
 	a.db.Query(&userQuery, &foundUser)
 
-	fmt.Println(foundUser)
-	fmt.Println("hello")
-
 	if foundUser.PublicId != "" {
 		return c.JSON(http.StatusOK, map[string]bool{
 			"verified": true,
 		})
 	}
-
 
 	return c.JSON(http.StatusOK, map[string]bool{
 		"verified": false,
