@@ -1,4 +1,4 @@
-use crate::{Cli, Commands, ListArgs, ListVariants, SearchVariants};
+use crate::{Cli, Commands, ListVariants, SearchVariants};
 
 use std::io;
 
@@ -10,13 +10,13 @@ pub fn run(args: Cli) -> Result<()> {
         Commands::Init {} => initialize(),
         Commands::Send { message, recepient } => send(message, recepient),
 
-        Commands::List(listArgs) => match listArgs.command {
+        Commands::List(list_args) => match list_args.command {
             ListVariants::Conversations => Ok(()),
             ListVariants::Friends => Ok(()),
             ListVariants::Users => Ok(()),
             ListVariants::Notifications => Ok(()),
         },
-        Commands::Search(searchArgs) => match searchArgs.command {
+        Commands::Search(search_args) => match search_args.command {
             SearchVariants::Messages { query } => Ok(()),
             SearchVariants::Friends { query } => Ok(()),
             SearchVariants::Users { query } => Ok(()),

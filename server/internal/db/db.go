@@ -18,9 +18,11 @@ type Dbm struct {
 func Init(ec config.Env) Dbm {
 
 	db, err := gorm.Open(postgres.Open(ec.DBString), &gorm.Config{})
+
 	if err != nil {
 		log.Fatal("failed to connect database", err)
 	}
+
 	sqldb, err := db.DB()
 
 	//sets this on the underlying sql db

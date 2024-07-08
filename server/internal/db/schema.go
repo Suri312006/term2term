@@ -12,7 +12,7 @@ type User struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	PublicId string `json:"id" gorm:"uniqueIndex"`
-	Name string `json:"username"`
+	Name string `json:"name"`
 }
 
 func (m Dbm) UpdateSchema() {
