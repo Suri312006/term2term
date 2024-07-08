@@ -1,4 +1,5 @@
 use crate::{Cli, Commands, ListVariants, SearchVariants};
+use colored::Colorize;
 
 use std::io;
 
@@ -25,7 +26,7 @@ pub fn run(args: Cli) -> Result<()> {
 }
 
 fn initialize() -> Result<()> {
-    println!("Starting Initialziation.");
+    println!("{}","Starting Initialziation.".green());
 
     let mut username = String::new();
 
@@ -52,11 +53,12 @@ fn initialize() -> Result<()> {
         }
     }
 
-    println!("Initialization Success!");
+    println!("{}","Initialization Success!".green());
     Ok(())
 }
 
 fn send(message: String, recepient: String) -> Result<()> {
+
     todo!()
 }
 
