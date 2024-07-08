@@ -1,8 +1,5 @@
-use std::{
-    error::Error,
-    fs::File,
-    io::{self, Read},
-};
+
+use std::{fs::File, io::Read};
 
 use anyhow::{Context, Result};
 

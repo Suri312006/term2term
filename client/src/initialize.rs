@@ -7,7 +7,7 @@ use std::{
 
 use crate::{
     api::{self, verify_user},
-    config::{self, Config},
+    config
 };
 
 use super::Paths;
@@ -16,7 +16,6 @@ use keyring::Entry;
 
 use anyhow::{anyhow, Context, Result};
 
-use serde::de::Error;
 use xdg_home::home_dir;
 
 pub fn gather_paths() -> Paths {

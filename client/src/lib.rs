@@ -9,4 +9,3 @@ pub struct Paths {
     pub config_dir_path: PathBuf,
     pub config_file_path: PathBuf,
 }
-
