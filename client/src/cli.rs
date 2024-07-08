@@ -58,6 +58,7 @@ fn initialize() -> Result<()> {
 }
 
 fn send(message: String, recepient: String) -> Result<()> {
+
     todo!()
 }
 
