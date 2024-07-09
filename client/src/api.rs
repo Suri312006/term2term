@@ -45,3 +45,29 @@ pub fn verify_user(user: User) -> Result<bool> {
 
     Ok(x.verified)
 }
+
+#[derive(Deserialize)]
+struct Conversations {
+
+
+    
+
+}
+
+pub fn list_conversations(user: User) -> Result<Conversations> {
+    let params = [("userid", user.id.to_string())];
+    let client = reqwest::blocking::Client::new();
+    let res = client
+        .post(format!("{}{}", SERVER_ROOT, "/user/verify"))
+        // .post("http://localhost:8080/user/register")
+        .form(&params)
+        .send()
+        .with_context(|| "Something went wrong accessing remote server")?;
+
+    let x: VerifyCheck = res
+        .json()
+        .with_context(|| "unable to parse json from server")?;
+
+    Ok(x.verified)
+
+}

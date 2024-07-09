@@ -10,6 +10,7 @@ pub struct Cli {
 }
 
 #[derive(Subcommand, Debug)]
+#[command(args_conflicts_with_subcommands = true)]
 pub enum Commands {
     /// Initializes your Term2Term account.
     Init {},
@@ -24,29 +25,32 @@ pub enum Commands {
     },
 
     /// List various aspects within the service.
-    List(ListArgs),
+    // List(ListArgs),
 
     /// Search various aspects within the service.
     Search(SearchArgs),
+
+    /// Conversation related things.
+    Conversation(ConversationArgs),
 }
 
-#[derive(Debug, Args)]
-#[command(args_conflicts_with_subcommands = true)]
-pub struct ListArgs {
-    #[command(subcommand)]
-    command: ListVariants,
-}
-
-#[derive(Debug, Subcommand)]
-pub enum ListVariants {
-    Conversations,
-
-    Friends,
-
-    Users,
-
-    Notifications,
-}
+// #[derive(Debug, Args)]
+// #[command(args_conflicts_with_subcommands = true)]
+// pub struct ListArgs {
+//     #[command(subcommand)]
+//     command: ListVariants,
+// }
+//
+// #[derive(Debug, Subcommand)]
+// pub enum ListVariants {
+//     Conversations,
+//
+//     Friends,
+//
+//     Users,
+//
+//     Notifications,
+// }
 
 #[derive(Debug, Args)]
 #[command(args_conflicts_with_subcommands = true)]
@@ -71,6 +75,20 @@ pub enum SearchVariants {
         #[arg(short, long)]
         query: String,
     },
+}
+
+#[derive(Debug, Args)]
+#[command(args_conflicts_with_subcommands = true, visible_alias="con")]
+pub struct ConversationArgs {
+    #[command(subcommand)]
+    command: ConversationVariants,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ConversationVariants {
+    /// Selects the current conversation.
+    Select,
+    List,
 }
 
 mod cli;

@@ -11,8 +11,20 @@ type User struct {
 	UpdatedAt time.Time      `json:"-"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	PublicId string `json:"id" gorm:"uniqueIndex"`
-	Name string `json:"name"`
+	// PrivateId string `json:"id" gorm:"uniqueIndex"`
+	PublicId  string `json:"id" gorm:"uniqueIndex"`
+	Name      string `json:"name"`
+}
+
+type Conversation struct {
+	ID        uint           `json:"-" gorm:"primarykey"`
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+
+	Id      string `json:"id" gorm:"uniqueIndex"`
+	User1Id string `json:"user1"`
+	User2Id string `json:"user2"`
 }
 
 func (m Dbm) UpdateSchema() {
