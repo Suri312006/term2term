@@ -4,7 +4,7 @@ use colored::Colorize;
 use std::io;
 
 use anyhow::{Ok, Result};
-use t2t::initialize as init;
+use t2t::{api::list_conversations, config, initialize::{self as init, gather_paths}};
 
 pub fn run(args: Cli) -> Result<()> {
     match args.command {
@@ -23,7 +23,8 @@ pub fn run(args: Cli) -> Result<()> {
             SearchVariants::Users { query } => Ok(()),
         },
         Commands::Conversation(convo_args) => match convo_args.command {
-            ConversationVariants::List => Ok(()),
+            ConversationVariants::List => {
+            },
             ConversationVariants::Select => Ok(()),
         },
     }
