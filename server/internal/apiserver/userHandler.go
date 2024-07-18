@@ -11,9 +11,9 @@ import (
 func (a ApiServer) initUserRoutes(e *echo.Echo) {
 	userGroup := e.Group("/user")
 	userGroup.POST("/register", a.registerUser)
-	userGroup.GET("/verify", a.verifyUser)
+	userGroup.POST("/verify", a.verifyUser)
 
-	userGroup.GET("/", a.findUser)
+	userGroup.GET("", a.findUser)
 }
 
 func (a ApiServer) registerUser(c echo.Context) error {

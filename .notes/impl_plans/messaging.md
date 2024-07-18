@@ -7,5 +7,7 @@ public id's that others can use to identify them.
 how do we start a conversation?
 
 
-con init?
+con start?
 - lists all users on the platform?
+
+
