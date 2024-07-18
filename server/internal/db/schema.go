@@ -23,8 +23,8 @@ type Conversation struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	Id      string `json:"id" gorm:"uniqueIndex"`
-	User1Id string `json:"user1"`
-	User2Id string `json:"user2"`
+	User1Id string `json:"user1_id"`
+	User2Id string `json:"user2_id"`
 }
 
 func (m Dbm) UpdateSchema() {
@@ -32,7 +32,7 @@ func (m Dbm) UpdateSchema() {
 }
 
 func (m Dbm) ResetSchema() {
-	m.db.Migrator().DropTable(&User{})
-	m.db.AutoMigrate(&User{})
+	m.db.Migrator().DropTable(&User{}, &Conversation{})
+	m.db.AutoMigrate(&User{}, &Conversation{})
 
 }

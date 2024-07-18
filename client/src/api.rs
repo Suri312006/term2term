@@ -48,22 +48,24 @@ pub fn verify_user(user: User) -> Result<bool> {
 
 #[derive(Deserialize, Debug)]
 pub struct Conversations {
-
+    // somethign about users
+    id: String,
+    user1_id: String,
+    user2_id: String,
 }
 
-pub fn list_conversations(user: User) -> Result<Conversations> {
+pub fn list_conversations(user: User) -> Result<Vec<Conversations>> {
     let params = [("userid", user.id.to_string())];
     let client = reqwest::blocking::Client::new();
     let res = client
-        .post(format!("{}{}", SERVER_ROOT, "/convo/list"))
+        .get(format!("{}{}", SERVER_ROOT, "/convo/list"))
         .form(&params)
         .send()
         .with_context(|| "Something went wrong accessing remote server")?;
 
-    let x: VerifyCheck = res
+    let convos: Vec<Conversations> = res
         .json()
-        .with_context(|| "unable to parse json from server")?;
+        .with_context(|| "unable to parse conversations from go server.")?;
 
-    Ok(Conversations {  })
-
+    Ok(convos)
 }
