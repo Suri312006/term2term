@@ -71,7 +71,7 @@ id = \"{}\"",
             .write_all(default_cfg.as_bytes())
             .with_context(|| format!("Unable to write to config file."))?;
     } else {
-        let config = config::parse(paths)?;
+        let config = config::parse()?;
         let verified = verify_user(config.user)?;
 
         if !verified {

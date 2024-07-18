@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 
 use serde::Deserialize;
 
-use crate::Paths;
+use crate::initialize::gather_paths;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
@@ -23,7 +23,8 @@ pub enum Theme {
     Default,
 }
 
-pub fn parse(paths: Paths) -> Result<Config> {
+pub fn parse() -> Result<Config> {
+    let paths = gather_paths();
     let mut cfg_file = File::open(paths.config_file_path)?;
     let mut buf = String::new();
     cfg_file.read_to_string(&mut buf)?;

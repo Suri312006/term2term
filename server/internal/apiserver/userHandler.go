@@ -10,7 +10,7 @@ import (
 
 func (a ApiServer) initUserRoutes(e *echo.Echo) {
 	userGroup := e.Group("/user")
-	userGroup.GET("/register", a.registerUser)
+	userGroup.POST("/register", a.registerUser)
 	userGroup.GET("/verify", a.verifyUser)
 }
 

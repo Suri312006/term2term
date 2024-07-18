@@ -4,7 +4,11 @@ use colored::Colorize;
 use std::io;
 
 use anyhow::{Ok, Result};
-use t2t::{api::list_conversations, config, initialize::{self as init, gather_paths}};
+use t2t::{
+    api::list_conversations,
+    config,
+    initialize::{self as init, gather_paths},
+};
 
 pub fn run(args: Cli) -> Result<()> {
     match args.command {
@@ -22,11 +26,7 @@ pub fn run(args: Cli) -> Result<()> {
             SearchVariants::Friends { query } => Ok(()),
             SearchVariants::Users { query } => Ok(()),
         },
-        Commands::Conversation(convo_args) => match convo_args.command {
-            ConversationVariants::List => {
-            },
-            ConversationVariants::Select => Ok(()),
-        },
+        Commands::Conversation(convo_args) => handle_convo(convo_args),
     }
 }
 
@@ -45,7 +45,7 @@ fn initialize() -> Result<()> {
                 .read_line(&mut username)
                 .expect("Error reading user input.");
 
-            init::initialize(username.trim().to_string()).unwrap();
+            init::initialize(username.trim().to_string())?;
             println!(
                 "Config file written to {}",
                 paths.config_file_path.to_str().unwrap()
@@ -77,6 +77,19 @@ fn search(messages: String, friends: String, users: String) -> Result<()> {
     todo!()
 }
 
-fn conversation(lol: ConversationArgs){
+fn handle_convo(lol: ConversationArgs) -> Result<()> {
+    // make the api request
+    //
+    // then display it
+    match lol.command {
+        ConversationVariants::List => {
+            let convos = list_conversations(config::parse()?.user)?;
 
+            println!("{:#?}", convos);
+        }
+        ConversationVariants::Select => {
+            todo!()
+        }
+    }
+    Ok(())
 }

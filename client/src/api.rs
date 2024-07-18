@@ -46,7 +46,7 @@ pub fn verify_user(user: User) -> Result<bool> {
     Ok(x.verified)
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Conversations {
 
 }
@@ -56,7 +56,6 @@ pub fn list_conversations(user: User) -> Result<Conversations> {
     let client = reqwest::blocking::Client::new();
     let res = client
         .post(format!("{}{}", SERVER_ROOT, "/convo/list"))
-        // .post("http://localhost:8080/user/register")
         .form(&params)
         .send()
         .with_context(|| "Something went wrong accessing remote server")?;
