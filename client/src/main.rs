@@ -89,6 +89,7 @@ pub enum ConversationVariants {
     /// Selects the current conversation.
     Select,
     List,
+    Start,
 }
 
 mod cli;

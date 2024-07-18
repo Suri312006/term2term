@@ -12,6 +12,8 @@ func (a ApiServer) initUserRoutes(e *echo.Echo) {
 	userGroup := e.Group("/user")
 	userGroup.POST("/register", a.registerUser)
 	userGroup.GET("/verify", a.verifyUser)
+
+	userGroup.GET("/", a.findUser)
 }
 
 func (a ApiServer) registerUser(c echo.Context) error {
@@ -50,4 +52,17 @@ func (a ApiServer) verifyUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]bool{
 		"verified": false,
 	})
+}
+
+func (a ApiServer) findUser(c echo.Context) error {
+
+	users := []db.User{}
+
+	err := a.db.QueryAll(&users)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, users)
+
 }

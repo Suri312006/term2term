@@ -5,7 +5,7 @@ use std::io;
 
 use anyhow::{Ok, Result};
 use t2t::{
-    api::list_conversations,
+    api::{find_user, list_conversations},
     config,
     initialize::{self as init, gather_paths},
 };
@@ -89,6 +89,11 @@ fn handle_convo(lol: ConversationArgs) -> Result<()> {
         }
         ConversationVariants::Select => {
             todo!()
+        }
+        ConversationVariants::Start => {
+            let users = find_user(None)?;
+
+            println!("{:#?}", users);
         }
     }
     Ok(())

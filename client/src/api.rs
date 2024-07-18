@@ -69,3 +69,20 @@ pub fn list_conversations(user: User) -> Result<Vec<Conversations>> {
 
     Ok(convos)
 }
+
+pub fn find_user(params: Option<Vec<(&str, String)>>) -> Result<Vec<User>> {
+    {
+        let client = reqwest::blocking::Client::new();
+        let res = client
+            .get(format!("{}{}", SERVER_ROOT, "/users/all"))
+            .form(&params)
+            .send()
+            .with_context(|| "Something went wrong accessing remote server")?;
+
+        let users: Vec<User> = res
+            .json()
+            .with_context(|| "unable to parse users from go server.")?;
+
+        Ok(users)
+    }
+}
