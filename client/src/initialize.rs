@@ -1,4 +1,5 @@
 use std::{
+    env::consts::EXE_SUFFIX,
     fs::{create_dir, File},
     io::{ErrorKind, Write},
     path::PathBuf,
@@ -7,7 +8,7 @@ use std::{
 
 use crate::{
     api::{self, verify_user},
-    config,
+    config::{self, Config},
 };
 
 use super::Paths;
@@ -58,17 +59,24 @@ pub fn initialize(username: String) -> Result<()> {
         let mut config_file = File::create(&paths.config_file_path)?;
 
         #[rustfmt::skip]
-            let default_cfg = format!(
-                "theme = \"Default\"
-[user] 
-# Do Not Change These Values Manually.                    
-name = \"{}\"
-id = \"{}\"",
-                new_user.name, new_user.id
-            );
+        // instead of using this string, just deserialize the struct
+        let new_cfg = Config{
+            theme: config::Theme::Default,
+            user: new_user,
+            curr_convo: None,
+        };
+        //         let default_cfg = format!(
+        //             "theme = \"Default\"
+        // [user]
+        // # Do Not Change These Values Manually.
+        // name = \"{}\"
+        // id = \"{}\"",
+        //             new_user.name, new_user.id
+        //         );
+        let file_data = toml::to_string(&new_cfg)?;
 
         config_file
-            .write_all(default_cfg.as_bytes())
+            .write_all(file_data.as_bytes())
             .with_context(|| format!("Unable to write to config file."))?;
     } else {
         let config = config::parse()?;

@@ -1,9 +1,13 @@
 use crate::{Cli, Commands, ConversationArgs, ConversationVariants, SearchVariants};
 use colored::Colorize;
+use toml_edit::DocumentMut;
 
-use std::io;
+use std::{
+    fs::File,
+    io::{self, Read},
+};
 
-use anyhow::{Ok, Result};
+use anyhow::{Context, Ok, Result};
 use t2t::{
     api::{find_user, list_conversations},
     config,
@@ -93,7 +97,33 @@ fn handle_convo(lol: ConversationArgs) -> Result<()> {
         ConversationVariants::Start => {
             let users = find_user(None)?;
 
-            println!("{:#?}", users);
+            let mut input = String::new();
+
+            println!("Type the numper of the user you would like to communicate with.");
+            for (i, user) in users.iter().enumerate() {
+                println!("{}. {}", i, user.name);
+            }
+
+            io::stdin()
+                .read_line(&mut input)
+                .with_context(|| "unable to read line from conversation selector")?;
+
+            //TODO: dont have to crach here, just have user reinput
+            let selection = input.parse::<u8>().with_context(|| "unable to parse int")?;
+
+            // write selection to config file to parse later ie when they send a new message
+
+            let paths = gather_paths();
+            let mut cfg_file = File::open(paths.config_file_path)?;
+            let mut buf = String::new();
+            cfg_file.read_to_string(&mut buf);
+
+            let mut doc = buf
+                .parse::<DocumentMut>()
+                .with_context(|| "error parsing config to doc")?;
+
+            assert_eq!(doc.to_string(), buf);
+            // doc[]
         }
     }
     Ok(())

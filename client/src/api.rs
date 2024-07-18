@@ -1,7 +1,7 @@
 use anyhow::{Context, Ok, Result};
 use serde::Deserialize;
 
-use crate::config::User;
+use crate::config::{Conversations, User};
 
 // const SERVER_ROOT: &str = "https://t2tserver.fly.dev";
 const SERVER_ROOT: &str = "http://localhost:8080";
@@ -46,13 +46,6 @@ pub fn verify_user(user: User) -> Result<bool> {
     Ok(x.verified)
 }
 
-#[derive(Deserialize, Debug)]
-pub struct Conversations {
-    // somethign about users
-    id: String,
-    user1_id: String,
-    user2_id: String,
-}
 
 pub fn list_conversations(user: User) -> Result<Vec<Conversations>> {
     let params = [("userid", user.id.to_string())];
