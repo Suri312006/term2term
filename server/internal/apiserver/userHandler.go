@@ -1,7 +1,6 @@
 package apiserver
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -9,16 +8,12 @@ import (
 	"github.com/suri312006/term2term/v2/internal/id"
 )
 
-func (a ApiServer) welcome(c echo.Context) error {
-	time := a.db.PingTime()
-	welcome := fmt.Sprintf(`
-		Welcome to the Term2Term server!!!
-		If you dont know what endpoints to hit, good luck!!
+func (a ApiServer) initUserRoutes(e *echo.Echo) {
+	userGroup := e.Group("/user")
+	userGroup.POST("/register", a.registerUser)
+	userGroup.POST("/verify", a.verifyUser)
 
-		METRICS:
-		Database Time: %s
-	`, time)
-	return c.String(http.StatusOK, welcome)
+	userGroup.GET("", a.findUser)
 }
 
 func (a ApiServer) registerUser(c echo.Context) error {
@@ -26,7 +21,7 @@ func (a ApiServer) registerUser(c echo.Context) error {
 	user_id := id.Must()
 
 	user := db.User{
-		PublicId: user_id,
+		PubId: user_id,
 		Name:     c.FormValue("name"),
 	}
 
@@ -41,14 +36,14 @@ func (a ApiServer) verifyUser(c echo.Context) error {
 
 	userQuery := db.User{
 		Name:     c.FormValue("name"),
-		PublicId: c.FormValue("id"),
+		PubId: c.FormValue("id"),
 	}
 
 	foundUser := db.User{}
 
 	a.db.Query(&userQuery, &foundUser)
 
-	if foundUser.PublicId != "" {
+	if foundUser.PubId != "" {
 		return c.JSON(http.StatusOK, map[string]bool{
 			"verified": true,
 		})
@@ -57,4 +52,17 @@ func (a ApiServer) verifyUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]bool{
 		"verified": false,
 	})
+}
+
+func (a ApiServer) findUser(c echo.Context) error {
+
+	users := []db.User{}
+
+	err := a.db.QueryAll(&users)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, users)
+
 }

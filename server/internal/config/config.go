@@ -12,8 +12,7 @@ type Env struct {
 }
 
 func Source() Env {
-	// this can err if file not found, but the file wont exist on deploy anyway
-	godotenv.Load("../../../.env")
+	godotenv.Load("../../.env")
 
 	port := find("PORT")
 

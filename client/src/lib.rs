@@ -1,11 +1,5 @@
-use std::path::PathBuf;
+pub mod core;
+pub mod file;
 
-pub mod api;
-pub mod config;
-pub mod initialize;
-
-pub struct Paths {
-    // do we really need these two?
-    pub config_dir_path: PathBuf,
-    pub config_file_path: PathBuf,
-}
+pub const SERVER_ROOT: &str = "http://localhost:8080";
+//pub const SERVER_ROOT: &str = "https://t2tserver.fly.dev";
