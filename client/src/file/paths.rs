@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 use std::{path::PathBuf, str::FromStr};
 
 use xdg_home::home_dir;

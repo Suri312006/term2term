@@ -1,47 +1,17 @@
 use std::{
     fs::{create_dir, File},
     io::{ErrorKind, Write},
-    path::PathBuf,
-    str::FromStr,
 };
-
-use crate::{
-    api::{self, verify_user},
-    config::{self, Config},
-};
-
-use super::Paths;
 
 use anyhow::{anyhow, Context, Result};
 
-use xdg_home::home_dir;
-
-pub fn gather_paths() -> Paths {
-    let err_msg = "Unable to find your HOME directory. \
-        Consider setting $HOME to your home directory and try again.";
-
-    let home_path = home_dir().expect(err_msg);
-
-    let t2t_dir = PathBuf::from(
-        String::from_str(home_path.to_str().unwrap()).unwrap() + "/.config/term2term",
-    );
-
-    let cfg_fp: PathBuf = [t2t_dir.to_str().unwrap(), "config.toml"].iter().collect();
-
-    let state_fp: PathBuf = [t2t_dir.to_str().unwrap(), "state.toml"].iter().collect();
-
-    Paths {
-        t2t_dir_path: t2t_dir,
-        config_file_path: cfg_fp,
-        state_file_path: state_fp,
-    }
-}
+use crate::{core::user::User, file::{config::Config, paths::Paths}};
 
 pub fn initialize(username: String) -> Result<()> {
     // check if the config flie already exists
     // if it doesnt, remove the file
-    let paths = gather_paths();
-    if !check_existing_config(&paths)? {
+    let paths = Paths::new()?;
+    if Config::check_existing()? {
         match create_dir(&paths.t2t_dir_path) {
             Ok(()) => {}
             Err(err) => {
@@ -54,7 +24,9 @@ pub fn initialize(username: String) -> Result<()> {
             }
         }
 
-        let new_user = api::register_new_user(&username)?;
+        let new_user = User::new(&username);
+
+        Config::write_default();
 
         let mut config_file = File::create(&paths.config_file_path)?;
 
@@ -82,17 +54,4 @@ pub fn initialize(username: String) -> Result<()> {
     }
 
     Ok(())
-}
-
-pub fn check_existing_config(paths: &Paths) -> Result<bool, std::io::Error> {
-    match File::open(paths.config_file_path.clone()) {
-        Ok(_) => Ok(true),
-        Err(err) => {
-            if err.kind() == ErrorKind::NotFound {
-                return Ok(false);
-            }
-
-            Err(err)
-        }
-    }
 }

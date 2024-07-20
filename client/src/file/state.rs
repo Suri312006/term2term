@@ -1,30 +1,23 @@
 use anyhow::{anyhow, Context, Result};
 use colored::Colorize;
-use serde::{Deserialize, Serialize};
 use std::{
     fs::{remove_file, File, OpenOptions},
     io::{ErrorKind, Read, Write},
     result::Result::Ok,
 };
 
-use crate::initialize::gather_paths;
+use super::paths::Paths;
+use crate::core::convo::Convo;
+use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct State {
-    pub curr_convo: Option<Conversation>,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Conversation {
-    // somethign about users
-    pub id: String,
-    pub user1_id: String,
-    pub user2_id: String,
+    pub curr_convo: Option<Convo>,
 }
 
 impl State {
     pub fn read() -> Result<State> {
-        let paths = gather_paths();
+        let paths = Paths::new()?;
         match File::open(&paths.state_file_path) {
             Ok(mut state_f) => {
                 let mut buf = String::new();
@@ -51,7 +44,7 @@ impl State {
     }
 
     pub fn write(&mut self) -> Result<()> {
-        let paths = gather_paths();
+        let paths = Paths::new()?;
 
         // opens and wipes file
         let mut state_f = match OpenOptions::new()
@@ -79,7 +72,7 @@ impl State {
 
 // creates new state and writes file
 fn create_state() -> Result<State> {
-    let paths = gather_paths();
+    let paths = Paths::new()?;
 
     let mut state_f = File::create(paths.state_file_path)?;
 
