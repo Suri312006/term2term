@@ -14,7 +14,6 @@ pub struct State {
     pub curr_convo: Option<Conversation>,
 }
 
-// i dont feel like this should be in config. maybe in some state.toml?
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Conversation {
     // somethign about users
@@ -55,22 +54,30 @@ impl State {
         let paths = gather_paths();
 
         // opens and wipes file
-        let mut state_f = match OpenOptions::new().truncate(true).open(&paths.state_file_path) {
+        let mut state_f = match OpenOptions::new()
+            .truncate(true)
+            .write(true)
+            .read(true)
+            .open(paths.state_file_path.clone())
+        {
             Ok(file) => Ok(file),
 
             Err(err) => match err.kind() {
-                ErrorKind::NotFound => Ok(File::create(&paths.state_file_path).unwrap()),
-                _ => Err(anyhow!(err.to_string())),
+                ErrorKind::NotFound => Ok(File::create(paths.state_file_path.clone()).unwrap()),
+                _ => Err(anyhow!(
+                    "there was an error trying to write state {}",
+                    err.to_string()
+                )),
             },
         }?;
 
         let state_data = toml::to_string(self).with_context(|| "error parsing current state")?;
-        state_f.write_all(state_data.as_bytes());
+        state_f.write_all(state_data.as_bytes())?;
         Ok(())
     }
 }
 
-// deletes state, and creates fresh file
+// creates new state and writes file
 fn create_state() -> Result<State> {
     let paths = gather_paths();
 

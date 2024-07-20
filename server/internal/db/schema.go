@@ -12,8 +12,8 @@ type User struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	// PrivateId string `json:"id" gorm:"uniqueIndex"`
-	PublicId  string `json:"id" gorm:"uniqueIndex"`
-	Name      string `json:"name"`
+	PublicId string `json:"id" gorm:"uniqueIndex"`
+	Name     string `json:"name"`
 }
 
 type Conversation struct {
@@ -25,6 +25,10 @@ type Conversation struct {
 	Id      string `json:"id" gorm:"uniqueIndex"`
 	User1Id string `json:"user1_id"`
 	User2Id string `json:"user2_id"`
+
+	User1 User `gorm:"foreignKey:User1Id;references:PublicId"`
+	User2 User `gorm:"foreignKey:User2Id;references:PublicId"`
+
 }
 
 func (m Dbm) UpdateSchema() {

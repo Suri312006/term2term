@@ -1,7 +1,7 @@
 use anyhow::{Context, Ok, Result};
 use serde::Deserialize;
 
-use crate::config::{Conversation, User};
+use crate::{config::User, state::Conversation};
 
 // const SERVER_ROOT: &str = "https://t2tserver.fly.dev";
 const SERVER_ROOT: &str = "http://localhost:8080";
@@ -34,7 +34,6 @@ pub fn verify_user(user: User) -> Result<bool> {
     let client = reqwest::blocking::Client::new();
     let res = client
         .post(format!("{}{}", SERVER_ROOT, "/user/verify"))
-        // .post("http://localhost:8080/user/register")
         .form(&params)
         .send()
         .with_context(|| "Something went wrong accessing remote server")?;
@@ -60,6 +59,24 @@ pub fn list_conversations(user: User) -> Result<Vec<Conversation>> {
         .with_context(|| "unable to parse conversations from go server.")?;
 
     Ok(convos)
+}
+
+pub fn create_conversation(curr_user: &User, other_user: &User) -> Result<Conversation> {
+    let params = [
+        ("user1_id", curr_user.id.to_string()),
+        ("user2_id", other_user.id.to_string()),
+    ];
+
+    let client = reqwest::blocking::Client::new();
+    let res = client
+        .post(format!("{}{}", SERVER_ROOT, "/convo"))
+        .form(&params)
+        .send()
+        .with_context(|| "server crashed")?;
+
+    let convo: Conversation = res.json().with_context(|| "unable to parse conversation")?;
+
+    Ok(convo)
 }
 
 pub fn find_user(params: Option<Vec<(&str, String)>>) -> Result<Vec<User>> {

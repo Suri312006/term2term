@@ -1,17 +1,14 @@
 use crate::{Cli, Commands, ConversationArgs, ConversationVariants, SearchVariants};
 use colored::Colorize;
-use toml_edit::DocumentMut;
 
-use std::{
-    fs::File,
-    io::{self, Read},
-};
+use std::io::{self};
 
-use anyhow::{Context, Ok, Result};
+use anyhow::{Context, Result};
 use t2t::{
-    api::{find_user, list_conversations},
-    config,
+    api::{create_conversation, find_user, list_conversations},
+    config::{self, parse_config},
     initialize::{self as init, gather_paths},
+    state::State,
 };
 
 pub fn run(args: Cli) -> Result<()> {
@@ -87,7 +84,7 @@ fn handle_convo(lol: ConversationArgs) -> Result<()> {
     // then display it
     match lol.command {
         ConversationVariants::List => {
-            let convos = list_conversations(config::parse()?.user)?;
+            let convos = list_conversations(parse_config()?.user)?;
 
             println!("{:#?}", convos);
         }
@@ -111,25 +108,21 @@ fn handle_convo(lol: ConversationArgs) -> Result<()> {
             //TODO: dont have to crach here, just have user reinput
             let selection = input
                 .trim()
-                .parse::<u8>()
+                .parse::<usize>()
                 .with_context(|| "unable to parse int")?;
 
             // make the api call to create convo
+            println!("selecting {}", selection);
+            let other_user = users
+                .get(selection)
+                .with_context(|| "yo somethign wrong with select")?;
 
             // write selection to config file to parse later ie when they send a new message
+            let mut state = State::read()?;
 
-            let paths = gather_paths();
-            let mut cfg_file = File::open(paths.config_file_path)?;
-            let mut buf = String::new();
-            cfg_file.read_to_string(&mut buf);
+            state.curr_convo = Some(create_conversation(&parse_config()?.user, &other_user)?);
 
-            let mut doc = buf
-                .parse::<DocumentMut>()
-                .with_context(|| "error parsing config to doc")?;
-
-            assert_eq!(doc.to_string(), buf);
-
-
+            state.write()?;
         }
     }
     Ok(())
