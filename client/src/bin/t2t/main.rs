@@ -96,6 +96,5 @@ mod cli;
 fn main() -> Result<()> {
     let args = Cli::parse();
     cli::run(args)?;
-
     Ok(())
 }

@@ -17,9 +17,9 @@ pub struct State {
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Conversation {
     // somethign about users
-    id: String,
-    user1_id: String,
-    user2_id: String,
+    pub id: String,
+    pub user1_id: String,
+    pub user2_id: String,
 }
 
 impl State {

@@ -4,7 +4,7 @@ use serde::Deserialize;
 use crate::{config::User, state::Conversation};
 
 // const SERVER_ROOT: &str = "https://t2tserver.fly.dev";
-const SERVER_ROOT: &str = "http://localhost:8080";
+pub const SERVER_ROOT: &str = "http://localhost:8080";
 
 pub fn register_new_user(username: &String) -> Result<User> {
     let params = [("name", username.to_string())];
@@ -95,3 +95,4 @@ pub fn find_user(params: Option<Vec<(&str, String)>>) -> Result<Vec<User>> {
         Ok(users)
     }
 }
+

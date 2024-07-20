@@ -52,7 +52,7 @@ func (a ApiServer) listConversations(c echo.Context) error {
 func (a ApiServer) newConvo(c echo.Context) error {
 
 	convo := db.Conversation{
-		Id:      id.Must(),
+		PubId:      id.Must(),
 		User1Id: c.FormValue("user1_id"),
 		User2Id: c.FormValue("user2_id"),
 	}
