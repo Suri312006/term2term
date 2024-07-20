@@ -44,11 +44,15 @@ type Message struct {
 	RecipientId string `json:"recipient_id"`
 	Recipient   User   `gorm:"foreignKey:RecipientId;references:PubId"`
 
-	ConversationId string       `json:"convo_id"`
-	Conversation   Conversation `gorm:"foreignKey:ConversationId;references:PubId"`
+	ConvoId string       `json:"convo_id"`
+	Convo   Conversation `gorm:"foreignKey:ConversationId;references:PubId"`
 
 	Body string `json:"body"`
+
+	Read bool `json:"read"`
 }
+
+
 
 func (m Dbm) UpdateSchema() {
 	m.db.AutoMigrate(&User{})
