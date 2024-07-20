@@ -1,5 +1,5 @@
 use std::{
-    fs::{File, OpenOptions},
+    fs::{create_dir, File, OpenOptions},
     io::{ErrorKind, Read, Write},
     result::Result::Ok,
 };
@@ -25,7 +25,7 @@ pub enum Theme {
 }
 
 impl Config {
-    fn read() -> Result<Config> {
+    pub fn read() -> Result<Config> {
         let paths = Paths::new()?;
         let mut cfg_file = File::open(paths.config_file_path)?;
         let mut buf = String::new();
@@ -59,6 +59,19 @@ impl Config {
 
         let paths = Paths::new()?;
 
+        // check for dir
+        match create_dir(&paths.t2t_dir_path) {
+            Ok(()) => {}
+            Err(err) => {
+                if err.kind() != ErrorKind::AlreadyExists {
+                    return Err(anyhow!(
+                        "Weird error while creating directory. {}",
+                        err.to_string()
+                    ));
+                }
+            }
+        };
+
         // check if aleady exists? overwrite existing config
         let mut cfg_file = match OpenOptions::new()
             .truncate(true)
@@ -69,7 +82,7 @@ impl Config {
             Ok(file) => Ok(file),
 
             Err(err) => match err.kind() {
-                ErrorKind::NotFound => Ok(File::create(paths.state_file_path.clone()).unwrap()),
+                ErrorKind::NotFound => Ok(File::create(paths.config_file_path.clone()).unwrap()),
                 _ => Err(anyhow!(
                     "there was an error trying to write defualt config file {}",
                     err.to_string()

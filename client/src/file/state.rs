@@ -21,7 +21,7 @@ impl State {
         match File::open(&paths.state_file_path) {
             Ok(mut state_f) => {
                 let mut buf = String::new();
-                state_f.read_to_string(&mut buf);
+                state_f.read_to_string(&mut buf)?;
 
                 let state: State = match toml::from_str(buf.as_str()) {
                     Ok(state) => state,

@@ -21,7 +21,7 @@ func (a ApiServer) registerUser(c echo.Context) error {
 	user_id := id.Must()
 
 	user := db.User{
-		PublicId: user_id,
+		PubId: user_id,
 		Name:     c.FormValue("name"),
 	}
 
@@ -36,14 +36,14 @@ func (a ApiServer) verifyUser(c echo.Context) error {
 
 	userQuery := db.User{
 		Name:     c.FormValue("name"),
-		PublicId: c.FormValue("id"),
+		PubId: c.FormValue("id"),
 	}
 
 	foundUser := db.User{}
 
 	a.db.Query(&userQuery, &foundUser)
 
-	if foundUser.PublicId != "" {
+	if foundUser.PubId != "" {
 		return c.JSON(http.StatusOK, map[string]bool{
 			"verified": true,
 		})

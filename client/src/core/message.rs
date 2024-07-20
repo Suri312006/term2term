@@ -1,17 +1,19 @@
 use anyhow::{anyhow, Context, Result};
 
-use crate::{api::SERVER_ROOT, config::User, state::Conversation};
+use crate::SERVER_ROOT;
+
+use super::{convo::Convo, user::User};
 
 struct Message {
     author: User,
     recipient: User,
-    convo: Conversation,
+    convo: Convo,
     body: String,
     read: bool,
 }
 
 impl Message {
-    fn new(author: User, recipient: User, convo: Conversation, body: String) -> Message {
+    fn new(author: User, recipient: User, convo: Convo, body: String) -> Message {
         Message {
             author,
             recipient,
@@ -43,4 +45,3 @@ impl Message {
         Ok(())
     }
 }
-

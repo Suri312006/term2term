@@ -1,8 +1,8 @@
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::SERVER_ROOT;
-#[derive(Deserialize, Serialize, Debug, Clone )]
+use crate::{file::config::Config, SERVER_ROOT};
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct User {
     pub name: String,
     pub id: String,
@@ -63,5 +63,8 @@ impl User {
         Ok(users)
     }
 
+    /// returns current user
+    pub fn curr() -> Result<User> {
+        Ok(Config::read()?.user)
+    }
 }
-

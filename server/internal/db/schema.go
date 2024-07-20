@@ -45,7 +45,7 @@ type Message struct {
 	Recipient   User   `gorm:"foreignKey:RecipientId;references:PubId"`
 
 	ConvoId string       `json:"convo_id"`
-	Convo   Conversation `gorm:"foreignKey:ConversationId;references:PubId"`
+	Convo   Conversation `gorm:"foreignKey:ConvoId;references:PubId"`
 
 	Body string `json:"body"`
 

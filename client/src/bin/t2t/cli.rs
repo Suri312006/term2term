@@ -1,19 +1,21 @@
 use crate::{Cli, Commands, ConversationArgs, ConversationVariants, SearchVariants};
 use colored::Colorize;
+use t2t::{
+    core::{convo::Convo, user::User},
+    file::{
+        config::{self, Config},
+        paths::Paths,
+        state::State,
+    },
+};
 
 use std::io::{self};
 
-use anyhow::{Context, Result};
-use t2t::{
-    api::{create_conversation, find_user, list_conversations},
-    config::{self, parse_config},
-    initialize::{self as init, gather_paths},
-    state::State,
-};
+use anyhow::{Context, Ok, Result};
 
 pub fn run(args: Cli) -> Result<()> {
     match args.command {
-        Commands::Init {} => initialize(),
+        Commands::Init {} => init(),
         Commands::Send { message, recepient } => send(message, recepient),
 
         // Commands::List(list_args) => match list_args.command {
@@ -31,31 +33,43 @@ pub fn run(args: Cli) -> Result<()> {
     }
 }
 
-fn initialize() -> Result<()> {
+fn init() -> Result<()> {
     println!("{}", "Starting Initialziation.".green());
 
-    let mut username = String::new();
+    let paths = Paths::new()?;
 
-    let paths = init::gather_paths();
-
-    match init::check_existing_config(&paths).unwrap() != true {
+    match Config::check_existing()? != true {
         true => {
             println!("What name would you like?");
+            let mut username = String::new();
 
             io::stdin()
                 .read_line(&mut username)
                 .expect("Error reading user input.");
 
-            init::initialize(username.trim().to_string())?;
+            // create user and write defualt config
+            let new_user = User::new(&username.trim())?;
+            Config::write_default(&new_user)?;
+
             println!(
                 "Config file written to {}",
                 paths.config_file_path.to_str().unwrap()
             );
         }
         false => {
-            println!("Found existing config file.");
+            println!("{}", "Found existing config file.".green());
 
-            init::initialize(username)?;
+            // verify that user is real
+            if Config::read()?.user.verify()? != true {
+                println!(
+                    "{}",
+                    //TODO: would be nice to write the file
+                    "Corrupted Config Detected.\nPlease delete config file and run `t2t init`"
+                        .red()
+                );
+
+                return Ok(());
+            }
         }
     }
 
@@ -84,7 +98,7 @@ fn handle_convo(lol: ConversationArgs) -> Result<()> {
     // then display it
     match lol.command {
         ConversationVariants::List => {
-            let convos = list_conversations(parse_config()?.user)?;
+            let convos = Convo::list_for(User::curr()?)?;
 
             println!("{:#?}", convos);
         }
@@ -92,7 +106,7 @@ fn handle_convo(lol: ConversationArgs) -> Result<()> {
             todo!()
         }
         ConversationVariants::Start => {
-            let users = find_user(None)?;
+            let users = User::find(None)?;
 
             let mut input = String::new();
 
@@ -120,7 +134,7 @@ fn handle_convo(lol: ConversationArgs) -> Result<()> {
             // write selection to config file to parse later ie when they send a new message
             let mut state = State::read()?;
 
-            state.curr_convo = Some(create_conversation(&parse_config()?.user, &other_user)?);
+            state.curr_convo = Some(Convo::new(&User::curr()?, &other_user)?);
 
             state.write()?;
         }
