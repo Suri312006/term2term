@@ -1,12 +1,14 @@
 use anyhow::Result;
 use clap::{Args, Parser, Subcommand};
-
-// simple greeter
+/// Welcome to Term2Term, an Easy to Use Terminal Communicator!
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
     command: Commands,
+
+    /// A quick way to send a message into the current conversation, if it exists.
+    message: Option<String>,
 }
 
 #[derive(Subcommand, Debug)]
@@ -15,17 +17,7 @@ pub enum Commands {
     /// Initializes your Term2Term account.
     Init {},
 
-    /// Send a message.
-    Send {
-        #[arg(short, long)]
-        message: String,
-
-        #[arg(short, long)]
-        recepient: String,
-    },
-
-    /// List various aspects within the service.
-    // List(ListArgs),
+    Message(MessageArgs),
 
     /// Search various aspects within the service.
     Search(SearchArgs),
@@ -33,24 +25,6 @@ pub enum Commands {
     /// Conversation related things.
     Conversation(ConversationArgs),
 }
-
-// #[derive(Debug, Args)]
-// #[command(args_conflicts_with_subcommands = true)]
-// pub struct ListArgs {
-//     #[command(subcommand)]
-//     command: ListVariants,
-// }
-//
-// #[derive(Debug, Subcommand)]
-// pub enum ListVariants {
-//     Conversations,
-//
-//     Friends,
-//
-//     Users,
-//
-//     Notifications,
-// }
 
 #[derive(Debug, Args)]
 #[command(args_conflicts_with_subcommands = true)]
@@ -78,7 +52,7 @@ pub enum SearchVariants {
 }
 
 #[derive(Debug, Args)]
-#[command(args_conflicts_with_subcommands = true, visible_alias="con")]
+#[command(args_conflicts_with_subcommands = true, visible_alias = "con")]
 pub struct ConversationArgs {
     #[command(subcommand)]
     command: ConversationVariants,
@@ -90,6 +64,22 @@ pub enum ConversationVariants {
     Select,
     List,
     Start,
+}
+
+#[derive(Debug, Args)]
+#[command(args_conflicts_with_subcommands = true, visible_alias = "msg")]
+pub struct MessageArgs {
+    #[command(subcommand)]
+    command: MessageVariants,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum MessageVariants {
+    /// Selects the current conversation.
+    Send {
+        #[arg(value_parser)]
+        message: String,
+    },
 }
 
 mod cli;

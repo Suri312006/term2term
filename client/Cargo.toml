@@ -11,8 +11,8 @@ name = "t2t"
 path = "src/bin/t2t/main.rs"
 
 [[bin]]
-name = "t2t-gui"
-path = "src/bin/t2t-gui/main.rs"
+name = "t2t-tui"
+path = "src/bin/t2t-tui/main.rs"
 
 [dependencies]
 anyhow = "1.0.86"

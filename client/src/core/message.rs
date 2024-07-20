@@ -1,32 +1,38 @@
+use std::fmt::format;
+
 use anyhow::{anyhow, Context, Result};
+use colored::Colorize;
 
 use crate::SERVER_ROOT;
 
 use super::{convo::Convo, user::User};
 
-struct Message {
-    author: User,
-    recipient: User,
+pub struct Message {
+    // author: User,
+    // recipient: User,
     convo: Convo,
     body: String,
-    read: bool,
+    // read: bool,
 }
 
 impl Message {
-    fn new(author: User, recipient: User, convo: Convo, body: String) -> Message {
-        Message {
-            author,
-            recipient,
-            convo,
+    pub fn new(body: String) -> Result<Message> {
+        Ok(Message {
+            // author: User::curr()?,
+            // recipient,
+            convo: Option::expect(
+                Convo::curr()?,
+                format!("{}", "Must select a conversation first.".red()).as_str(),
+            ),
             body,
-            read: false,
-        }
+            // read: false,
+        })
     }
 
-    fn send(&self) -> Result<()> {
+    pub fn send(&self) -> Result<()> {
         let params = [
-            ("author_id", self.author.id.as_str()),
-            ("recipient_id", self.recipient.id.as_str()),
+            ("author_id", self.convo.user1_id.as_str()),
+            ("recipient_id", self.convo.user2_id.as_str()),
             ("convo_id", self.convo.id.as_str()),
             ("body", self.body.as_str()),
         ];

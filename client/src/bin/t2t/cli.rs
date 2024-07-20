@@ -1,7 +1,13 @@
-use crate::{Cli, Commands, ConversationArgs, ConversationVariants, SearchVariants};
+use crate::{
+    Cli, Commands, ConversationArgs, ConversationVariants, MessageVariants, SearchVariants,
+};
 use colored::Colorize;
 use t2t::{
-    core::{convo::Convo, user::User},
+    core::{
+        convo::Convo,
+        message::{self, Message},
+        user::User,
+    },
     file::{
         config::{self, Config},
         paths::Paths,
@@ -16,14 +22,18 @@ use anyhow::{Context, Ok, Result};
 pub fn run(args: Cli) -> Result<()> {
     match args.command {
         Commands::Init {} => init(),
-        Commands::Send { message, recepient } => send(message, recepient),
+        // Commands::Send { message, recepient } => send(message, recepient),
+        Commands::Message(msg_args) => match msg_args.command {
+            MessageVariants::Send { message } => {
+                let msg = Message::new(message)?;
 
-        // Commands::List(list_args) => match list_args.command {
-        //     ListVariants::Conversations => Ok(()),
-        //     ListVariants::Friends => Ok(()),
-        //     ListVariants::Users => Ok(()),
-        //     ListVariants::Notifications => Ok(()),
-        // },
+                msg.send()?;
+
+                println!("{}", "Message sent!".green());
+                Ok(())
+            }
+        },
+
         Commands::Search(search_args) => match search_args.command {
             SearchVariants::Messages { query } => Ok(()),
             SearchVariants::Friends { query } => Ok(()),

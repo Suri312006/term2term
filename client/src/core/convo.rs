@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::SERVER_ROOT;
+use crate::{file::state::State, SERVER_ROOT};
 
 use super::user::User;
 #[derive(Deserialize, Serialize, Debug)]
@@ -45,5 +45,9 @@ impl Convo {
             .with_context(|| "unable to parse conversations from go server.")?;
 
         Ok(convos)
+    }
+
+    pub fn curr() -> Result<Option<Convo>> {
+        Ok(State::read()?.curr_convo)
     }
 }

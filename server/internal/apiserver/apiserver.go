@@ -40,6 +40,7 @@ func (a ApiServer) initRoutes() {
 
 	a.initConvoRoutes(a.e)
 	a.initUserRoutes(a.e)
+	a.initMsgRoutes(a.e)
 }
 
 func (a ApiServer) welcome(c echo.Context) error {
