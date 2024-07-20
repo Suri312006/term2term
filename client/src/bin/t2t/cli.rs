@@ -42,7 +42,6 @@ pub fn run(args: Cli) -> Result<()> {
         Commands::Conversation(convo_args) => handle_convo(convo_args),
     }
 }
-
 fn init() -> Result<()> {
     println!("{}", "Starting Initialziation.".green());
 
