@@ -1,7 +1,7 @@
 use anyhow::{Context, Ok, Result};
 use serde::Deserialize;
 
-use crate::config::{Conversations, User};
+use crate::config::{Conversation, User};
 
 // const SERVER_ROOT: &str = "https://t2tserver.fly.dev";
 const SERVER_ROOT: &str = "http://localhost:8080";
@@ -46,8 +46,7 @@ pub fn verify_user(user: User) -> Result<bool> {
     Ok(x.verified)
 }
 
-
-pub fn list_conversations(user: User) -> Result<Vec<Conversations>> {
+pub fn list_conversations(user: User) -> Result<Vec<Conversation>> {
     let params = [("userid", user.id.to_string())];
     let client = reqwest::blocking::Client::new();
     let res = client
@@ -56,7 +55,7 @@ pub fn list_conversations(user: User) -> Result<Vec<Conversations>> {
         .send()
         .with_context(|| "Something went wrong accessing remote server")?;
 
-    let convos: Vec<Conversations> = res
+    let convos: Vec<Conversation> = res
         .json()
         .with_context(|| "unable to parse conversations from go server.")?;
 

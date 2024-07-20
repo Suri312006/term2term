@@ -109,7 +109,12 @@ fn handle_convo(lol: ConversationArgs) -> Result<()> {
                 .with_context(|| "unable to read line from conversation selector")?;
 
             //TODO: dont have to crach here, just have user reinput
-            let selection = input.parse::<u8>().with_context(|| "unable to parse int")?;
+            let selection = input
+                .trim()
+                .parse::<u8>()
+                .with_context(|| "unable to parse int")?;
+
+            // make the api call to create convo
 
             // write selection to config file to parse later ie when they send a new message
 
@@ -123,7 +128,8 @@ fn handle_convo(lol: ConversationArgs) -> Result<()> {
                 .with_context(|| "error parsing config to doc")?;
 
             assert_eq!(doc.to_string(), buf);
-            // doc[]
+
+
         }
     }
     Ok(())

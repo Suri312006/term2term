@@ -33,3 +33,4 @@ use github issuse to track progress, i really like this behaviour
 
 
 
+maybe we could have a t2t-gui and a normal t2t

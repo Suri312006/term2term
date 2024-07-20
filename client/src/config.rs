@@ -1,16 +1,22 @@
-use std::{fs::File, io::Read};
+use std::{
+    fs::File,
+    io::{ErrorKind, Read, Write},
+    result::Result::Ok,
+};
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 
 use serde::{Deserialize, Serialize};
 
-use crate::initialize::gather_paths;
+use crate::{
+    initialize::gather_paths,
+    state::{self, State},
+};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Config {
     pub theme: Theme,
     pub user: User,
-    pub curr_convo: Option<Conversations>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -24,18 +30,10 @@ pub enum Theme {
     Default,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Conversations {
-    // somethign about users
-    id: String,
-    user1_id: String,
-    user2_id: String,
-}
-
 //TODO: write a default config function that returns  a defualt config? so
 //everything is all here in the same place
 
-pub fn parse() -> Result<Config> {
+pub fn parse_config() -> Result<Config> {
     let paths = gather_paths();
     let mut cfg_file = File::open(paths.config_file_path)?;
     let mut buf = String::new();

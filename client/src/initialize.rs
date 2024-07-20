@@ -1,5 +1,4 @@
 use std::{
-    env::consts::EXE_SUFFIX,
     fs::{create_dir, File},
     io::{ErrorKind, Write},
     path::PathBuf,
@@ -23,17 +22,18 @@ pub fn gather_paths() -> Paths {
 
     let home_path = home_dir().expect(err_msg);
 
-    let config_dir_path = PathBuf::from(
+    let t2t_dir = PathBuf::from(
         String::from_str(home_path.to_str().unwrap()).unwrap() + "/.config/term2term",
     );
 
-    let config_file_path: PathBuf = [config_dir_path.to_str().unwrap(), "config.toml"]
-        .iter()
-        .collect();
+    let cfg_fp: PathBuf = [t2t_dir.to_str().unwrap(), "config.toml"].iter().collect();
+
+    let state_fp: PathBuf = [t2t_dir.to_str().unwrap(), "state.toml"].iter().collect();
 
     Paths {
-        config_dir_path,
-        config_file_path,
+        t2t_dir_path: t2t_dir,
+        config_file_path: cfg_fp,
+        state_file_path: state_fp,
     }
 }
 
@@ -42,7 +42,7 @@ pub fn initialize(username: String) -> Result<()> {
     // if it doesnt, remove the file
     let paths = gather_paths();
     if !check_existing_config(&paths)? {
-        match create_dir(&paths.config_dir_path) {
+        match create_dir(&paths.t2t_dir_path) {
             Ok(()) => {}
             Err(err) => {
                 if err.kind() != ErrorKind::AlreadyExists {
@@ -59,27 +59,19 @@ pub fn initialize(username: String) -> Result<()> {
         let mut config_file = File::create(&paths.config_file_path)?;
 
         #[rustfmt::skip]
-        // instead of using this string, just deserialize the struct
+        // instead of using this string, just serialize the struct
         let new_cfg = Config{
             theme: config::Theme::Default,
             user: new_user,
-            curr_convo: None,
         };
-        //         let default_cfg = format!(
-        //             "theme = \"Default\"
-        // [user]
-        // # Do Not Change These Values Manually.
-        // name = \"{}\"
-        // id = \"{}\"",
-        //             new_user.name, new_user.id
-        //         );
+
         let file_data = toml::to_string(&new_cfg)?;
 
         config_file
             .write_all(file_data.as_bytes())
             .with_context(|| format!("Unable to write to config file."))?;
     } else {
-        let config = config::parse()?;
+        let config = config::parse_config()?;
         let verified = verify_user(config.user)?;
 
         if !verified {
