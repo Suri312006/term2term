@@ -10,7 +10,7 @@ import (
 
 func (a ApiServer) initMsgRoutes(e *echo.Echo) {
 	msgGroup := e.Group("/msg")
-	msgGroup.POST("/send", a.sendMessage)
+	msgGroup.POST("", a.sendMessage)
 }
 
 func (a ApiServer) sendMessage(c echo.Context) error {
@@ -29,4 +29,28 @@ func (a ApiServer) sendMessage(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, "")
+}
+
+func (a ApiServer) findMsg(c echo.Context) error {
+
+	if user_id := c.QueryParam("user_id"); user_id == ""{
+
+		return c.String(http.StatusBadRequest ,"must provide user id")
+
+
+	}
+
+	if all := c.QueryParam("all"); all == "true" {
+		// want support for all messages
+		
+
+	}
+
+
+	if unread := c.QueryParam("unread"); unread == "true"{
+		// unread messages
+
+	}
+
+	// want support for some messages
 }
