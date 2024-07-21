@@ -48,6 +48,6 @@ impl Convo {
     }
 
     pub fn curr() -> Result<Option<Convo>> {
-        Ok(State::read()?.curr_convo)
+        Ok(State::read()?.convo)
     }
 }

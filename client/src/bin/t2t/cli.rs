@@ -1,27 +1,22 @@
+use crate::UserArgs;
 use crate::{
     Cli, Commands, ConversationArgs, ConversationVariants, MessageVariants, SearchVariants,
+    UserVariants,
 };
 use colored::Colorize;
+use t2t::core::user;
 use t2t::{
-    core::{
-        convo::Convo,
-        message::{self, Message},
-        user::User,
-    },
-    file::{
-        config::{self, Config},
-        paths::Paths,
-        state::State,
-    },
+    core::{convo::Convo, message::Message, user::User},
+    file::{config::Config, paths::Paths, state::State},
 };
 
-use std::io::{self};
+use std::io;
 
-use anyhow::{Context, Ok, Result};
+use anyhow::{bail, Context, Result};
 
 pub fn run(args: Cli) -> Result<()> {
     match args.command {
-        Commands::Init {} => init(),
+        Commands::Init {} => handle_init(),
         // Commands::Send { message, recepient } => send(message, recepient),
         Commands::Message(msg_args) => match msg_args.command {
             MessageVariants::Send { message } => {
@@ -35,14 +30,16 @@ pub fn run(args: Cli) -> Result<()> {
         },
 
         Commands::Search(search_args) => match search_args.command {
-            SearchVariants::Messages { query } => Ok(()),
-            SearchVariants::Friends { query } => Ok(()),
-            SearchVariants::Users { query } => Ok(()),
+            SearchVariants::Messages { query } => todo!(),
+            SearchVariants::Friends { query } => todo!(),
+            SearchVariants::Users { query } => todo!(),
         },
         Commands::Conversation(convo_args) => handle_convo(convo_args),
+        Commands::User(user_args) => handle_user(user_args),
     }
 }
-fn init() -> Result<()> {
+
+fn handle_init() -> Result<()> {
     println!("{}", "Starting Initialziation.".green());
 
     let paths = Paths::new()?;
@@ -58,7 +55,14 @@ fn init() -> Result<()> {
 
             // create user and write defualt config
             let new_user = User::new(&username.trim())?;
-            Config::write_default(&new_user)?;
+
+            let mut default_cfg = Config::default();
+
+            default_cfg.users.push(new_user);
+
+            default_cfg.write()?;
+
+            // Config::write_default(&new_user)?;
 
             println!(
                 "Config file written to {}",
@@ -69,7 +73,7 @@ fn init() -> Result<()> {
             println!("{}", "Found existing config file.".green());
 
             // verify that user is real
-            if Config::read()?.user.verify()? != true {
+            if User::curr()?.verify()? != true {
                 println!(
                     "{}",
                     //TODO: would be nice to write the file
@@ -86,19 +90,52 @@ fn init() -> Result<()> {
     Ok(())
 }
 
-fn send(message: String, recepient: String) -> Result<()> {
-    println!(
-        "{} {}{}",
-        "Sending Message to".green(),
-        recepient.green(),
-        "!".green()
-    );
+fn handle_user(user_args: UserArgs) -> Result<()> {
+    if user_args.list == true {
+        todo!("List users")
+    }
+    match user_args.command {
+        Some(args) => match args {
+            UserVariants::New { username } => {
+                // create new user
+                let user = User::new(&username)?;
 
-    todo!()
-}
+                let mut config = Config::read()?;
 
-fn search(messages: String, friends: String, users: String) -> Result<()> {
-    todo!()
+                config.users.push(user);
+
+                config.write()?;
+            }
+
+            UserVariants::Switch { username } => {
+                let cfg = Config::read()?;
+                match username {
+                    Some(username) => match cfg.users.iter().find(|user| user.name == username) {
+                        Some(user) => {
+                            let mut state = State::read()?;
+                            state.user = Some(user.clone());
+                            state.write()?;
+                        }
+
+                        None => {
+                            bail!("User not found, be sure to use an exact name as argument.")
+                        }
+                    },
+
+                    // fuzzy find for users
+                    None => {
+                        //TODO: please do this, supposed to be fuzzy finding
+                        let cfg = Config::read()?;
+                    }
+                }
+            }
+        },
+
+        // should just be useless
+        None => {}
+    };
+
+    Ok(())
 }
 
 fn handle_convo(lol: ConversationArgs) -> Result<()> {
@@ -143,7 +180,7 @@ fn handle_convo(lol: ConversationArgs) -> Result<()> {
             // write selection to config file to parse later ie when they send a new message
             let mut state = State::read()?;
 
-            state.curr_convo = Some(Convo::new(&User::curr()?, &other_user)?);
+            state.convo = Some(Convo::new(&User::curr()?, &other_user)?);
 
             state.write()?;
         }

@@ -1,7 +1,10 @@
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::{file::config::Config, SERVER_ROOT};
+use crate::{
+    file::{config::Config, state::State},
+    SERVER_ROOT,
+};
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct User {
     pub name: String,
@@ -65,6 +68,8 @@ impl User {
 
     /// returns current user
     pub fn curr() -> Result<User> {
-        Ok(Config::read()?.user)
+        Ok(State::read()?
+            .user
+            .with_context(|| "Application Error: Grave error reading state.")?)
     }
 }
