@@ -24,6 +24,9 @@ pub enum Commands {
 
     /// Conversation related things.
     Conversation(ConversationArgs),
+
+    /// User related things
+    User(UserArgs),
 }
 
 #[derive(Debug, Args)]
@@ -77,8 +80,36 @@ pub struct MessageArgs {
 pub enum MessageVariants {
     /// Selects the current conversation.
     Send {
-        #[arg(value_parser)]
+        #[arg(short, long, value_parser)]
         message: String,
+    },
+
+    List {
+        #[arg(short, long, default_value_t = false)]
+        all: bool,
+    },
+}
+
+#[derive(Debug, Args)]
+#[command(args_conflicts_with_subcommands = true, arg_required_else_help(true))]
+pub struct UserArgs {
+    #[command(subcommand)]
+    command: Option<UserVariants>,
+
+    #[arg(short, long, default_value_t = false)]
+    list: bool,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum UserVariants {
+    New {
+        #[arg(short, long)]
+        username: String,
+    },
+
+    Switch {
+        #[arg(short, long)]
+        username: Option<String>,
     },
 }
 

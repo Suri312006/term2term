@@ -4,8 +4,8 @@ use std::{
     result::Result::Ok,
 };
 
-use anyhow::{anyhow, Context};
 use anyhow::Result;
+use anyhow::{anyhow, Context};
 
 use serde::{Deserialize, Serialize};
 
@@ -16,7 +16,7 @@ use super::paths::Paths;
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Config {
     pub theme: Theme,
-    pub user: User,
+    pub users: Vec<User>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -51,15 +51,11 @@ impl Config {
         }
     }
 
-    pub fn write_default(user: &User) -> Result<()> {
-        let default_cfg = Config {
-            theme: Theme::Default,
-            user: user.clone(),
-        };
-
+    //TODO: i would really like to use toml_edit to do this so comments and stuff
+    //are preserved but it is what it is you know
+    pub fn write(&self) -> Result<()> {
         let paths = Paths::new()?;
 
-        // check for dir
         match create_dir(&paths.t2t_dir_path) {
             Ok(()) => {}
             Err(err) => {
@@ -72,7 +68,6 @@ impl Config {
             }
         };
 
-        // check if aleady exists? overwrite existing config
         let mut cfg_file = match OpenOptions::new()
             .truncate(true)
             .write(true)
@@ -90,9 +85,15 @@ impl Config {
             },
         }?;
 
-        let file_data = toml::to_string(&default_cfg)?;
+        let file_data = toml::to_string(&self)?;
         cfg_file.write_all(file_data.as_bytes())?;
-
         Ok(())
+    }
+
+    pub fn default() -> Config {
+        Config {
+            theme: Theme::Default,
+            users: vec![],
+        }
     }
 }

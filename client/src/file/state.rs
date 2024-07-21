@@ -7,12 +7,13 @@ use std::{
 };
 
 use super::paths::Paths;
-use crate::core::convo::Convo;
+use crate::core::{convo::Convo, user::User};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct State {
-    pub curr_convo: Option<Convo>,
+    pub convo: Option<Convo>,
+    pub user: Option<User>,
 }
 
 impl State {
@@ -76,7 +77,10 @@ fn create_state() -> Result<State> {
 
     let mut state_f = File::create(paths.state_file_path)?;
 
-    let state = State { curr_convo: None };
+    let state = State {
+        convo: None,
+        user: None,
+    };
 
     let file_data = toml::to_string(&state)?;
 
