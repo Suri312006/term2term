@@ -27,6 +27,17 @@ pub fn run(args: Cli) -> Result<()> {
                 println!("{}", "Message sent!".green());
                 Ok(())
             }
+            MessageVariants::List { all } => {
+                // search for all messages from this user
+                if all {
+                    return Ok(());
+                };
+
+                // only return unread messages for user
+                Ok(())
+
+                // print
+            }
         },
 
         Commands::Search(search_args) => match search_args.command {

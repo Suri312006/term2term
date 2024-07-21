@@ -83,6 +83,11 @@ pub enum MessageVariants {
         #[arg(short, long, value_parser)]
         message: String,
     },
+
+    List {
+        #[arg(short, long, default_value_t = false)]
+        all: bool,
+    },
 }
 
 #[derive(Debug, Args)]
