@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option go_package = "github.com/suri312006/term2term/v2";
+
+package t2t;
+
+message User {
+    string id = 1;
+    string name = 2;
+}
+
+message UserList {
+    repeated User users = 1;
+}
+
+service UserService {
+    rpc VerifyUser(VerifyUserReq) returns (VerifyUserRes);
+    rpc SearchUser(User) returns (UserList);
+    rpc NewUser(NewUserReq) returns (User);
+}
+
+message VerifyUserRes {
+    bool verified = 1;
+}
+
+message VerifyUserReq {
+    string id = 1;
+    string name = 2;
+}
+
+
+message NewUserReq {
+    string username = 1;
+}
