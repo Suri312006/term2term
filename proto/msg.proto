@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "github.com/suri312006/term2term/v2";
+
+package t2t;
+
+
+// import "google/protobuf/timestamp.proto"; //too cringe wouldnt work
+import "user.proto";
+
+message Msg {
+    User author = 1;
+    string body = 2;
+    User recipient = 3;
+    int64 unix_time = 4;
+}
+
+service MsgHandler {
+    rpc SendMsg(Msg) returns (MsgSendRes);
+}
+
+message MsgSendRes {
+    bool success = 1;
+}
+
+
