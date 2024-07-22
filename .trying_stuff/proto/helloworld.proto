@@ -6,6 +6,7 @@ package helloworld;
 
 service Greeter {
     rpc SayHello (HelloRequest) returns (HelloReply);
+    rpc GetGrandma (GrandmaRequest) returns (GrandmaResponse);
 }
 
 message HelloRequest {
@@ -15,4 +16,14 @@ message HelloRequest {
 message HelloReply {
     string message = 1;
 }
+
+message GrandmaRequest {
+    int32 age = 1;
+    int64 amount = 2;
+}
+
+message GrandmaResponse {
+    bool availible = 1;
+}
+
 

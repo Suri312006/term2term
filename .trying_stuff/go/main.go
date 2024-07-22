@@ -13,7 +13,13 @@ type server struct {
 }
 
 func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
-	return &pb.HelloReply{Message: "Hello, Sigma!!!! "}, nil
+	return &pb.HelloReply{Message: "Hello, World! "}, nil
+}
+
+func (s *server) GetGrandma(ctx context.Context, in *pb.GrandmaRequest) (*pb.GrandmaResponse, error) {
+
+	return &pb.GrandmaResponse{Availible: true}, nil
+
 }
 
 func main() {
