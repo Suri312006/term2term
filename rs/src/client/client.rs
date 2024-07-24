@@ -3,7 +3,6 @@ use tonic::transport::Channel;
 use crate::{
     grpc::{
         convo_service_client::ConvoServiceClient, msg_service_client::MsgServiceClient,
-        user_service_client::UserServiceClient,
     },
     Result,
 };
