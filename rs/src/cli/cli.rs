@@ -104,14 +104,12 @@ async fn handle_user(user_args: UserArgs, client: &mut Client) -> Result<()> {
     if let Some(cmd) = user_args.command {
         match cmd {
             UserVariants::New { username } => {
-                let req = Request::new(NewUserReq {
-                    username: "what the hale".to_string(),
-                });
-
-                let res = client.user_handler.create(req).await?;
-
-                println!("RESPONSE: {:?}", res);
-                Ok(())
+                client
+                    .user_handler
+                    .new_user(NewUserReq {
+                        username: "lmao".to_string(),
+                    })
+                    .await
             }
 
             UserVariants::Switch { username } => Ok(todo!()),

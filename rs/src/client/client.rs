@@ -8,18 +8,21 @@ use crate::{
     Result,
 };
 
+use super::user::UserHandler;
+
 pub struct Client {
-    pub user_handler: UserServiceClient<Channel>,
+    pub user_handler: UserHandler,
     pub msg_handler: MsgServiceClient<Channel>,
     pub convo_handler: ConvoServiceClient<Channel>,
 }
 
-const SERVER_ADDRESS: &str = "http://[::1]:50051";
+pub(super) const SERVER_ADDRESS: &str = "http://[::1]:50051";
 
 impl Client {
     pub async fn new() -> Result<Client> {
         Ok(Client {
-            user_handler: UserServiceClient::connect(SERVER_ADDRESS).await?,
+            //TODO: create wrappers around these so you can have convenience functions
+            user_handler: UserHandler::new().await?,
             msg_handler: MsgServiceClient::connect(SERVER_ADDRESS).await?,
             convo_handler: ConvoServiceClient::connect(SERVER_ADDRESS).await?,
         })
