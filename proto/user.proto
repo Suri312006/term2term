@@ -4,6 +4,7 @@ option go_package = "github.com/suri312006/term2term/v2";
 
 package t2t;
 
+
 message User {
     string id = 1;
     string name = 2;
@@ -14,9 +15,9 @@ message UserList {
 }
 
 service UserService {
-    rpc VerifyUser(VerifyUserReq) returns (VerifyUserRes);
-    rpc SearchUser(User) returns (UserList);
-    rpc NewUser(NewUserReq) returns (User);
+    rpc Create(NewUserReq) returns (User);
+    rpc Verify(VerifyUserReq) returns (VerifyUserRes);
+    rpc Search(User) returns (UserList);
 }
 
 message VerifyUserRes {
@@ -27,7 +28,6 @@ message VerifyUserReq {
     string id = 1;
     string name = 2;
 }
-
 
 message NewUserReq {
     string username = 1;

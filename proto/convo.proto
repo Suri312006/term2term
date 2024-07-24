@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "github.com/suri312006/term2term/v2";
+
+import "user.proto";
+
+package t2t;
+
+message Participants {
+    repeated User users = 1;
+}
+
+message Convo {
+    string id = 1;
+    Participants participants = 2;
+    string createdAt = 3;
+}
+
+service ConvoService {
+    rpc Create(NewConvoReq) returns (Convo);
+}
+
+message NewConvoReq {
+    Participants participants = 1;
+}
+
