@@ -1,2 +1,4 @@
 pub mod args;
-pub mod cli;
+mod cli;
+
+pub use cli::*;

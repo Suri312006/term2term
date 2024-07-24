@@ -19,10 +19,10 @@ type userServer struct {
 func (s userServer) VerifyUser(ctx context.Context, req *v2.VerifyUserReq) (*v2.VerifyUserRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyUser not implemented")
 }
-func (s userServer) SearchUser(ctx context.Context, user *v2.UserData) (*v2.UserList, error) {
+func (s userServer) SearchUser(ctx context.Context, user *v2.User) (*v2.UserList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchUser not implemented")
 }
-func (s userServer) NewUser(ctx context.Context, req *v2.NewUserReq) (*v2.UserData, error) {
+func (s userServer) Create(ctx context.Context, req *v2.NewUserReq) (*v2.User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "lmao creating new user")
 }
 

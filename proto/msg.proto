@@ -23,7 +23,7 @@ message MsgList {
     repeated Msg messages = 1;
 }
 
-service MsgHandler {
+service MsgService {
     rpc Send(Msg) returns (MsgSendRes);
     rpc Search(MsgFetchReq) returns(MsgList);
 }

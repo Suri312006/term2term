@@ -19,126 +19,126 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	MsgHandler_Send_FullMethodName   = "/t2t.MsgHandler/Send"
-	MsgHandler_Search_FullMethodName = "/t2t.MsgHandler/Search"
+	MsgService_Send_FullMethodName   = "/t2t.MsgService/Send"
+	MsgService_Search_FullMethodName = "/t2t.MsgService/Search"
 )
 
-// MsgHandlerClient is the client API for MsgHandler service.
+// MsgServiceClient is the client API for MsgService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type MsgHandlerClient interface {
+type MsgServiceClient interface {
 	Send(ctx context.Context, in *Msg, opts ...grpc.CallOption) (*MsgSendRes, error)
 	Search(ctx context.Context, in *MsgFetchReq, opts ...grpc.CallOption) (*MsgList, error)
 }
 
-type msgHandlerClient struct {
+type msgServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewMsgHandlerClient(cc grpc.ClientConnInterface) MsgHandlerClient {
-	return &msgHandlerClient{cc}
+func NewMsgServiceClient(cc grpc.ClientConnInterface) MsgServiceClient {
+	return &msgServiceClient{cc}
 }
 
-func (c *msgHandlerClient) Send(ctx context.Context, in *Msg, opts ...grpc.CallOption) (*MsgSendRes, error) {
+func (c *msgServiceClient) Send(ctx context.Context, in *Msg, opts ...grpc.CallOption) (*MsgSendRes, error) {
 	out := new(MsgSendRes)
-	err := c.cc.Invoke(ctx, MsgHandler_Send_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, MsgService_Send_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *msgHandlerClient) Search(ctx context.Context, in *MsgFetchReq, opts ...grpc.CallOption) (*MsgList, error) {
+func (c *msgServiceClient) Search(ctx context.Context, in *MsgFetchReq, opts ...grpc.CallOption) (*MsgList, error) {
 	out := new(MsgList)
-	err := c.cc.Invoke(ctx, MsgHandler_Search_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, MsgService_Search_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// MsgHandlerServer is the server API for MsgHandler service.
-// All implementations must embed UnimplementedMsgHandlerServer
+// MsgServiceServer is the server API for MsgService service.
+// All implementations must embed UnimplementedMsgServiceServer
 // for forward compatibility
-type MsgHandlerServer interface {
+type MsgServiceServer interface {
 	Send(context.Context, *Msg) (*MsgSendRes, error)
 	Search(context.Context, *MsgFetchReq) (*MsgList, error)
-	mustEmbedUnimplementedMsgHandlerServer()
+	mustEmbedUnimplementedMsgServiceServer()
 }
 
-// UnimplementedMsgHandlerServer must be embedded to have forward compatible implementations.
-type UnimplementedMsgHandlerServer struct {
+// UnimplementedMsgServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedMsgServiceServer struct {
 }
 
-func (UnimplementedMsgHandlerServer) Send(context.Context, *Msg) (*MsgSendRes, error) {
+func (UnimplementedMsgServiceServer) Send(context.Context, *Msg) (*MsgSendRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Send not implemented")
 }
-func (UnimplementedMsgHandlerServer) Search(context.Context, *MsgFetchReq) (*MsgList, error) {
+func (UnimplementedMsgServiceServer) Search(context.Context, *MsgFetchReq) (*MsgList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented")
 }
-func (UnimplementedMsgHandlerServer) mustEmbedUnimplementedMsgHandlerServer() {}
+func (UnimplementedMsgServiceServer) mustEmbedUnimplementedMsgServiceServer() {}
 
-// UnsafeMsgHandlerServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to MsgHandlerServer will
+// UnsafeMsgServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to MsgServiceServer will
 // result in compilation errors.
-type UnsafeMsgHandlerServer interface {
-	mustEmbedUnimplementedMsgHandlerServer()
+type UnsafeMsgServiceServer interface {
+	mustEmbedUnimplementedMsgServiceServer()
 }
 
-func RegisterMsgHandlerServer(s grpc.ServiceRegistrar, srv MsgHandlerServer) {
-	s.RegisterService(&MsgHandler_ServiceDesc, srv)
+func RegisterMsgServiceServer(s grpc.ServiceRegistrar, srv MsgServiceServer) {
+	s.RegisterService(&MsgService_ServiceDesc, srv)
 }
 
-func _MsgHandler_Send_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MsgService_Send_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Msg)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgHandlerServer).Send(ctx, in)
+		return srv.(MsgServiceServer).Send(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MsgHandler_Send_FullMethodName,
+		FullMethod: MsgService_Send_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgHandlerServer).Send(ctx, req.(*Msg))
+		return srv.(MsgServiceServer).Send(ctx, req.(*Msg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MsgHandler_Search_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MsgService_Search_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MsgFetchReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgHandlerServer).Search(ctx, in)
+		return srv.(MsgServiceServer).Search(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MsgHandler_Search_FullMethodName,
+		FullMethod: MsgService_Search_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgHandlerServer).Search(ctx, req.(*MsgFetchReq))
+		return srv.(MsgServiceServer).Search(ctx, req.(*MsgFetchReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// MsgHandler_ServiceDesc is the grpc.ServiceDesc for MsgHandler service.
+// MsgService_ServiceDesc is the grpc.ServiceDesc for MsgService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var MsgHandler_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "t2t.MsgHandler",
-	HandlerType: (*MsgHandlerServer)(nil),
+var MsgService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "t2t.MsgService",
+	HandlerType: (*MsgServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Send",
-			Handler:    _MsgHandler_Send_Handler,
+			Handler:    _MsgService_Send_Handler,
 		},
 		{
 			MethodName: "Search",
-			Handler:    _MsgHandler_Search_Handler,
+			Handler:    _MsgService_Search_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

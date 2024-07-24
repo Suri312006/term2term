@@ -1,9 +1,12 @@
 #![allow(unused)] // just for convenience, can remove later
 
-use super::args::{Commands, ConversationArgs, MessageVariants, SearchVariants, UserArgs};
-use crate::Result;
+use super::args::{
+    Commands, ConversationArgs, MessageVariants, SearchVariants, UserArgs, UserVariants,
+};
+use crate::{grpc::NewUserReq, Client, Error, Result};
 
 use clap::Parser;
+use tonic::Request;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -16,7 +19,7 @@ pub struct Cli {
 }
 
 impl Cli {
-    pub fn run(self) -> Result<()> {
+    pub async fn run(self, client: &mut Client) -> Result<()> {
         match self.command {
             Commands::Init {} => handle_init(),
             // Commands::Send { message, recepient } => send(message, recepient),
@@ -40,7 +43,7 @@ impl Cli {
                 SearchVariants::Users { query } => todo!(),
             },
             Commands::Conversation(convo_args) => handle_convo(convo_args),
-            Commands::User(user_args) => handle_user(user_args),
+            Commands::User(user_args) => handle_user(user_args, client).await,
         }
     }
 }
@@ -97,54 +100,25 @@ fn handle_init() -> Result<()> {
     todo!()
 }
 
-fn handle_user(user_args: UserArgs) -> Result<()> {
-    // if user_args.list == true {
-    //     todo!("List users")
-    // }
-    //
-    // match user_args.command {
-    //     Some(args) => match args {
-    //         UserVariants::New { username } => {
-    //             // create new user
-    //             let user = User::new(&username)?;
-    //
-    //             let mut config = Config::read()?;
-    //
-    //             config.users.push(user);
-    //
-    //             config.write()?;
-    //         }
-    //
-    //         UserVariants::Switch { username } => {
-    //             let cfg = Config::read()?;
-    //             match username {
-    //                 Some(username) => match cfg.users.iter().find(|user| user.name == username) {
-    //                     Some(user) => {
-    //                         let mut state = State::read()?;
-    //                         state.user = Some(user.clone());
-    //                         state.write()?;
-    //                     }
-    //
-    //                     None => {
-    //                         bail!("User not found, be sure to use an exact name as argument.")
-    //                     }
-    //                 },
-    //
-    //                 // fuzzy find for users
-    //                 None => {
-    //                     //TODO: please do this, supposed to be fuzzy finding
-    //                     let cfg = Config::read()?;
-    //                 }
-    //             }
-    //         }
-    //     },
-    //
-    //     // should just be useless
-    //     None => {}
-    // };
-    //
-    // Ok(())
-    todo!()
+async fn handle_user(user_args: UserArgs, client: &mut Client) -> Result<()> {
+    if let Some(cmd) = user_args.command {
+        match cmd {
+            UserVariants::New { username } => {
+                let req = Request::new(NewUserReq {
+                    username: "what the hale".to_string(),
+                });
+
+                let res = client.user_handler.create(req).await?;
+
+                println!("RESPONSE: {:?}", res);
+                Ok(())
+            }
+
+            UserVariants::Switch { username } => Ok(todo!()),
+        }
+    } else {
+        Err(Error::from("No user arg passed in."))
+    }
 }
 
 fn handle_convo(lol: ConversationArgs) -> Result<()> {
