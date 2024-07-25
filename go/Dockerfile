@@ -17,10 +17,6 @@ WORKDIR /app
 # Run go mod download to download dependencies
 RUN go mod download
 
-RUN ls /app/internal/apiserver
-
-RUN ls /app/cmd/t2tServer
-
 # Change working directory to the directory containing the main package
 WORKDIR /app/cmd/t2tServer
 
