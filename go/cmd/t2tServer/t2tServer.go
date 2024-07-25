@@ -10,6 +10,7 @@ import (
 	api "github.com/suri312006/term2term/v2/pkg/server"
 	"google.golang.org/grpc"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	m "github.com/suri312006/term2term/v2/pkg/middleware"
 )
 
@@ -29,13 +30,19 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen on port 50051: %v", err)
 	}
+	// Shared options for the logger, with a custom gRPC code to log level function.
+	opts := []recovery.Option{
+		recovery.WithRecoveryHandler(m.RecoverPanic),
+	}
 
 	s := grpc.NewServer(
 		grpc.ChainStreamInterceptor(
 			m.DBStreamServerInterceptor(&dbSession),
+			recovery.StreamServerInterceptor(opts...),
 		),
 		grpc.ChainUnaryInterceptor(
 			m.DBUnaryServerInterceptor(&dbSession),
+			recovery.UnaryServerInterceptor(opts...),
 		),
 	)
 
