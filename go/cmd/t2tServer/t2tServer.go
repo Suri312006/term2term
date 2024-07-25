@@ -1,30 +1,17 @@
 package main
 
 import (
-	"context"
 	"net"
 	"os"
 
 	log "github.com/sirupsen/logrus"
-	v2 "github.com/suri312006/term2term/v2/proto-gen"
+	"github.com/suri312006/term2term/v2/internal/config"
+	"github.com/suri312006/term2term/v2/internal/db"
+	api "github.com/suri312006/term2term/v2/pkg/server"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+
+	m "github.com/suri312006/term2term/v2/pkg/middleware"
 )
-
-type userServer struct {
-	v2.UnimplementedUserServiceServer
-}
-
-func (s userServer) VerifyUser(ctx context.Context, req *v2.VerifyUserReq) (*v2.VerifyUserRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VerifyUser not implemented")
-}
-func (s userServer) SearchUser(ctx context.Context, user *v2.User) (*v2.UserList, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchUser not implemented")
-}
-func (s userServer) Create(ctx context.Context, req *v2.NewUserReq) (*v2.User, error) {
-	return nil, status.Errorf(codes.Unimplemented, "lmao creating new user")
-}
 
 func init() {
 	log.SetFormatter(&log.JSONFormatter{})
@@ -34,14 +21,25 @@ func init() {
 
 func main() {
 
+	cfg := config.Source()
+
+	dbSession := db.Init(cfg)
+
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen on port 50051: %v", err)
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.ChainStreamInterceptor(
+			m.DBStreamServerInterceptor(&dbSession),
+		),
+		grpc.ChainUnaryInterceptor(
+			m.DBUnaryServerInterceptor(&dbSession),
+		),
+	)
 
-	v2.RegisterUserServiceServer(s, &userServer{})
+	api.AttachServers(s)
 
 	log.Printf("gRPC server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {

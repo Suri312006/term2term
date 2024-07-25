@@ -3,7 +3,11 @@
 use super::args::{
     Commands, ConversationArgs, MessageVariants, SearchVariants, UserArgs, UserVariants,
 };
-use crate::{grpc::NewUserReq, Client, Error, Result};
+use crate::{
+    files::config::{self, Config, ConfigUser},
+    grpc::NewUserReq,
+    Client, Error, Result,
+};
 
 use clap::Parser;
 use tonic::Request;
@@ -104,12 +108,18 @@ async fn handle_user(user_args: UserArgs, client: &mut Client) -> Result<()> {
     if let Some(cmd) = user_args.command {
         match cmd {
             UserVariants::New { username } => {
-                client
+                let new_user = client
                     .user_handler
                     .new_user(NewUserReq {
                         username: "lmao".to_string(),
                     })
-                    .await
+                    .await?;
+
+                let mut conf = Config::read()?;
+                conf.users.push(new_user.into());
+                conf.write();
+
+                Ok(())
             }
 
             UserVariants::Switch { username } => Ok(todo!()),

@@ -17,23 +17,23 @@ impl From<ConfigUser> for User {
     }
 }
 
-pub struct UserHandler {
+pub struct UserClient {
     client: UserServiceClient<Channel>,
 }
 
-impl UserHandler {
+impl UserClient {
     pub async fn new() -> Result<Self> {
-        Ok(UserHandler {
+        Ok(UserClient {
             client: UserServiceClient::connect(SERVER_ADDRESS).await?,
         })
     }
 
-    pub async fn new_user(&mut self, req: NewUserReq) -> Result<()> {
+    pub async fn new_user(&mut self, req: NewUserReq) -> Result<User> {
         let req = Request::new(req);
 
         let res = self.client.create(req).await?;
 
-        println!("RESPONSE: {:?}", res);
-        Ok(())
+        println!("RESPONSE: {:?}", &res);
+        Ok(res.into_inner())
     }
 }
