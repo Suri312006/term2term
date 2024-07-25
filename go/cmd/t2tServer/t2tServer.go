@@ -26,9 +26,9 @@ func main() {
 
 	dbSession := db.Init(cfg)
 
-	lis, err := net.Listen("tcp", ":50051")
+	lis, err := net.Listen("tcp", cfg.Port)
 	if err != nil {
-		log.Fatalf("failed to listen on port 50051: %v", err)
+		log.Fatalf("failed to listen on port %s: %v",cfg.Port, err)
 	}
 	// Shared options for the logger, with a custom gRPC code to log level function.
 	opts := []recovery.Option{
