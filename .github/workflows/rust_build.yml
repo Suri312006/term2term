@@ -13,11 +13,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Download and install protoc
+      run: |
+        PROTOC_VERSION=$(wget -qO- https://github.com/protocolbuffers/protobuf/releases/latest | grep -oP 'tag/v\K[0-9.]+')
+        wget "https://github.com/protocolbuffers/protobuf/releases/download/v$PROTOC_VERSION/protoc-$PROTOC_VERSION-linux-x86_64.zip"
+        unzip protoc-$PROTOC_VERSION-linux-x86_64.zip -d protoc3
+        sudo mv protoc3/bin/protoc /usr/local/bin/
+        sudo mv protoc3/include/* /usr/local/include/
+        protoc --version
+
+    - name: checkout code
     - uses: actions/checkout@v4
+
     - name: Build
       run: cd rs && cargo build --verbose --release
+
     - name: Run tests
       run: cd rs && cargo test --verbose
+
+    - name: pushing artifact to releases
     - uses: actions/upload-artifact@v4
       with:
           name: t2t
