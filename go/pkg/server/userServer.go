@@ -19,8 +19,7 @@ func (s UserServer) VerifyUser(ctx context.Context, req *v2.VerifyUserReq) (*v2.
 
 	dbSesh := ctx.Value(m.DBSession).(*db.Dbm)
 	if dbSesh == nil {
-		log.Fatal("database connection not provided")
-		return nil, status.Error(codes.Internal, "no database connection found")
+		log.Panic("database connection not provided")
 	}
 
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyUser not implemented")
@@ -29,7 +28,7 @@ func (s UserServer) VerifyUser(ctx context.Context, req *v2.VerifyUserReq) (*v2.
 func (s UserServer) SearchUser(ctx context.Context, user *v2.User) (*v2.UserList, error) {
 	dbSesh := ctx.Value(m.DBSession).(*db.Dbm)
 	if dbSesh == nil {
-		return nil, status.Error(codes.Internal, "no database connection found")
+		log.Panic("database connection not provided")
 	}
 
 	return nil, status.Errorf(codes.Unimplemented, "method SearchUser not implemented")
@@ -38,10 +37,9 @@ func (s UserServer) SearchUser(ctx context.Context, user *v2.User) (*v2.UserList
 func (s UserServer) Create(ctx context.Context, req *v2.NewUserReq) (*v2.User, error) {
 	dbSesh := ctx.Value(m.DBSession).(*db.Dbm)
 	if dbSesh == nil {
-		return nil, status.Error(codes.Internal, "no database connection found")
+		log.Panic("database connection not provided")// do we want to leak this to user?
 	}
 
-	// log.Fatal("cerating new user")
-	log.Panic("error creating new user")
+	log.Tracef("creating user: %s", req)
 	return nil, status.Errorf(codes.Unimplemented, "lmao creating new user")
 }

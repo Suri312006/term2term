@@ -8,6 +8,5 @@ import (
 
 func RecoverPanic(p any) (err error) {
 	log.Warn("Recovering from panic")
-
-	return status.Errorf(codes.Unknown, "panic triggered: %v", p)
+	return status.Errorf(codes.Internal, "Internal Server Error")
 }
