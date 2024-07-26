@@ -74,12 +74,12 @@ impl Config {
             .truncate(true)
             .write(true)
             .read(true)
-            .open(paths.config_file_path.clone())
+            .open(&paths.config_file_path)
         {
             Ok(file) => Ok(file),
 
             Err(err) => match err.kind() {
-                ErrorKind::NotFound => Ok(File::create(paths.config_file_path.clone()).unwrap()),
+                ErrorKind::NotFound => Ok(File::create(&paths.config_file_path).unwrap()),
                 _ => Err(Error::from(format!(
                     "there was an error trying to write defualt config file {}",
                     err.to_string()
