@@ -7,6 +7,7 @@ use super::args::{
 };
 use crate::{
     app,
+    args::MessageArgs,
     files::{
         config::{self, Config, ConfigUser},
         Paths,
@@ -33,8 +34,13 @@ pub struct Cli {
 impl Cli {
     pub async fn run(self, app: &mut AppState) -> Result<()> {
         if let Some(message) = self.message {
-            print!("{}", message);
-            return Ok(());
+            handle_message(
+                MessageArgs {
+                    command: MessageVariants::Send { message },
+                },
+                app,
+            )
+            .await?
         } else if self.command.is_none() {
             Cli::command().print_help();
             return Ok(());
@@ -43,42 +49,7 @@ impl Cli {
         match self.command.unwrap() {
             Commands::Init {} => handle_init(app),
             // Commands::Send { message, recepient } => send(message, recepient),
-            Commands::Message(msg_args) => match msg_args.command {
-                MessageVariants::Send { message } => {
-                    let res = app
-                    .handlers
-                    .msg
-                    .send(
-                        MsgSendReq {
-                            body: message,
-                            convo: Some(
-                                app.cache
-                                    .convo
-                                    .clone()
-                                    .ok_or(Error::from(
-                                        "Please select convo first before trying to send a message",
-                                    ))?
-                                    .try_into()?,
-                            ),
-
-                            author: Some(
-                                app.cache
-                                    .user
-                                    .clone()
-                                    .ok_or(Error::from("user does not exist in cache"))?
-                                .into()
-                            ),
-                            unix_time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
-                        }
-                        .into_request(),
-                    ).await?;
-
-                    Ok(())
-                }
-                MessageVariants::List { all } => {
-                    todo!()
-                }
-            },
+            Commands::Message(msg_args) => handle_message(msg_args, app).await,
 
             Commands::Search(search_args) => match search_args.command {
                 SearchVariants::Messages { query } => todo!(),
@@ -126,4 +97,47 @@ async fn handle_user(user_args: UserArgs, app: &mut AppState) -> Result<()> {
 
 fn handle_convo(lol: ConversationArgs) -> Result<()> {
     todo!()
+}
+
+async fn handle_message(msg_args: MessageArgs, app: &mut AppState) -> Result<()> {
+    match msg_args.command {
+        MessageVariants::Send { message } => {
+            let res = app
+                .handlers
+                .msg
+                .send(
+                    MsgSendReq {
+                        body: message,
+                        convo: Some(
+                            app.cache
+                                .convo
+                                .clone()
+                                .ok_or(Error::from(
+                                    "Please select convo first before trying to send a message",
+                                ))?
+                                .try_into()?,
+                        ),
+
+                        author: Some(
+                            app.cache
+                                .user
+                                .clone()
+                                .ok_or(Error::from("user does not exist in cache"))?
+                                .into(),
+                        ),
+                        unix_time: SystemTime::now()
+                            .duration_since(UNIX_EPOCH)
+                            .unwrap()
+                            .as_secs(),
+                    }
+                    .into_request(),
+                )
+                .await?;
+
+            Ok(())
+        }
+        MessageVariants::List { all } => {
+            todo!()
+        }
+    }
 }

@@ -14,7 +14,7 @@ type MsgServer struct {
 	v2.UnimplementedMsgServiceServer
 }
 
-func (s MsgServer) Send(ctx context.Context, msg *v2.Msg) (*v2.MsgSendRes, error) {
+func (s MsgServer) Send(ctx context.Context, msg *v2.MsgSendReq) (*v2.Msg, error) {
 	dbSesh := ctx.Value(m.DBSession).(*db.Dbm)
 	if dbSesh == nil {
 		return nil, status.Error(codes.Internal, "no database connection found")
