@@ -5,6 +5,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/suri312006/term2term/v2/internal/db"
+	"github.com/suri312006/term2term/v2/internal/id"
 	m "github.com/suri312006/term2term/v2/pkg/middleware"
 	v2 "github.com/suri312006/term2term/v2/proto-gen"
 	"google.golang.org/grpc/codes"
@@ -37,9 +38,25 @@ func (s UserServer) SearchUser(ctx context.Context, user *v2.User) (*v2.UserList
 func (s UserServer) Create(ctx context.Context, req *v2.NewUserReq) (*v2.User, error) {
 	dbSesh := ctx.Value(m.DBSession).(*db.Dbm)
 	if dbSesh == nil {
-		log.Panic("database connection not provided")// do we want to leak this to user?
+		log.Panic("database connection not provided") // do we want to leak this to user?
 	}
 
-	log.Tracef("creating user: %s", req)
-	return nil, status.Errorf(codes.Unimplemented, "lmao creating new user")
+	user_id := id.Must()
+
+	user := db.User{
+		PubId: user_id,
+		Name:  req.Username,
+	}
+
+	err := dbSesh.Save(&user)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Tracef("creating user: %v", user)
+
+	return &v2.User{
+		Id:   user.PubId,
+		Name: user.Name,
+	}, nil
 }

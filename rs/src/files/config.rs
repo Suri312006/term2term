@@ -28,15 +28,24 @@ pub enum Theme {
 
 impl From<User> for ConfigUser {
     fn from(value: User) -> Self {
-        ConfigUser { username: value.name, id: value.id }
+        ConfigUser {
+            username: value.name,
+            id: value.id,
+        }
     }
-    
 }
 
 impl Config {
     pub fn read() -> Result<Config> {
         let paths = Paths::new()?;
-        let mut cfg_file = File::open(paths.config_file_path)?;
+        // let mut cfg_file = File::open(paths.config_file_path);
+
+        let mut cfg_file = match File::open(paths.config_file_path) {
+            Ok(file) => file,
+            // file probably didnt exist, just return default and call it a day
+            Err(_) => return Ok(Config::default()),
+        };
+
         let mut buf = String::new();
         cfg_file.read_to_string(&mut buf)?;
 

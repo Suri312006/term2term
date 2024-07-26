@@ -110,13 +110,12 @@ async fn handle_user(user_args: UserArgs, client: &mut Client) -> Result<()> {
             UserVariants::New { username } => {
                 let new_user = client
                     .user_handler
-                    .new_user(NewUserReq {
-                        username: "lmao".to_string(),
-                    })
+                    .new_user(NewUserReq { username })
                     .await?;
 
                 let mut conf = Config::read()?;
                 conf.users.push(new_user.into());
+
                 conf.write();
 
                 Ok(())

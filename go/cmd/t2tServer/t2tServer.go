@@ -42,6 +42,7 @@ func main() {
 		),
 		grpc.ChainUnaryInterceptor(
 			m.DBUnaryServerInterceptor(&dbSession),
+			m.TraceUnaryServerInterceptor(),
 			recovery.UnaryServerInterceptor(opts...),
 		),
 	)

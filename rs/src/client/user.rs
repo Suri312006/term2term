@@ -30,9 +30,7 @@ impl UserClient {
 
     pub async fn new_user(&mut self, req: NewUserReq) -> Result<User> {
         let req = Request::new(req);
-
         let res = self.client.create(req).await?;
-
         println!("RESPONSE: {:?}", &res);
         Ok(res.into_inner())
     }

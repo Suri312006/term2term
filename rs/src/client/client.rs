@@ -13,8 +13,9 @@ pub struct Client {
     pub convo_handler: ConvoServiceClient<Channel>,
 }
 
-// pub(super) const SERVER_ADDRESS: &str = "http://[::1]:50051";
-pub(super) const SERVER_ADDRESS: &str = "https://t2tserver.fly.dev:433";
+pub(super) const SERVER_ADDRESS: &str = "http://[::]:50051";
+// this shit needs to be paid for :sob:
+// pub(super) const SERVER_ADDRESS: &str = "http://t2tserver.fly.dev:54321";
 
 impl Client {
     pub async fn new() -> Result<Client> {

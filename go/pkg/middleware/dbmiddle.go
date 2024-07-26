@@ -4,6 +4,7 @@ import (
 	"context"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	log "github.com/sirupsen/logrus"
 	"github.com/suri312006/term2term/v2/internal/db"
 	"google.golang.org/grpc"
 )
@@ -25,5 +26,13 @@ func DBStreamServerInterceptor(session *db.Dbm) grpc.StreamServerInterceptor {
 		wrapped := grpc_middleware.WrapServerStream(stream)
 		wrapped.WrappedContext = context.WithValue(stream.Context(), DBSession, session)
 		return handler(srv, wrapped)
+	}
+}
+
+func TraceUnaryServerInterceptor() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
+		log.Tracef("Request Received: %v, Server Info %v", req, info)
+		return handler(ctx, req)
+
 	}
 }
