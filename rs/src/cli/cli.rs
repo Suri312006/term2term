@@ -4,12 +4,16 @@ use super::args::{
     Commands, ConversationArgs, MessageVariants, SearchVariants, UserArgs, UserVariants,
 };
 use crate::{
-    files::config::{self, Config, ConfigUser},
+    files::{
+        config::{self, Config, ConfigUser},
+        Paths,
+    },
     grpc::NewUserReq,
-    Client, Error, Result,
+    Error, Handlers, Result,
 };
 
 use clap::Parser;
+use colored::Colorize;
 use tonic::Request;
 
 #[derive(Parser, Debug)]
@@ -23,9 +27,9 @@ pub struct Cli {
 }
 
 impl Cli {
-    pub async fn run(self, client: &mut Client) -> Result<()> {
+    pub async fn run(self, handlers: &mut Handlers) -> Result<()> {
         match self.command {
-            Commands::Init {} => handle_init(),
+            Commands::Init {} => handle_init(handlers),
             // Commands::Send { message, recepient } => send(message, recepient),
             Commands::Message(msg_args) => match msg_args.command {
                 MessageVariants::Send { message } => {
@@ -47,12 +51,22 @@ impl Cli {
                 SearchVariants::Users { query } => todo!(),
             },
             Commands::Conversation(convo_args) => handle_convo(convo_args),
-            Commands::User(user_args) => handle_user(user_args, client).await,
+            Commands::User(user_args) => handle_user(user_args, handlers).await,
         }
     }
 }
 
-fn handle_init() -> Result<()> {
+fn handle_init(handlers: &mut Handlers) -> Result<()> {
+    println!("{}", "Starting Initialziation.".green());
+
+    let Paths = Paths::new()?;
+
+    match Config::check_existing()? {
+        true => {}
+
+        false => {}
+    }
+
     // println!("{}", "Starting Initialziation.".green());
     //
     // let paths = Paths::new()?;
@@ -104,14 +118,15 @@ fn handle_init() -> Result<()> {
     todo!()
 }
 
-async fn handle_user(user_args: UserArgs, client: &mut Client) -> Result<()> {
+async fn handle_user(user_args: UserArgs, handlers: &mut Handlers) -> Result<()> {
     if let Some(cmd) = user_args.command {
         match cmd {
             UserVariants::New { username } => {
-                let new_user = client
-                    .user_handler
-                    .new_user(NewUserReq { username })
-                    .await?;
+                let new_user = handlers
+                    .user
+                    .create(Request::new(NewUserReq { username }))
+                    .await?
+                    .into_inner();
 
                 let mut conf = Config::read()?;
                 conf.users.push(new_user.into());
