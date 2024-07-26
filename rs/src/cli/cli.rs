@@ -1,6 +1,9 @@
 #![allow(unused)] // just for convenience, can remove later
 
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{
+    io,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use super::args::{
     Commands, ConversationArgs, MessageVariants, SearchVariants, UserArgs, UserVariants,
@@ -83,7 +86,41 @@ async fn handle_init(app: &mut AppState) -> Result<()> {
             }
         }
 
-        false => todo!(),
+        false => {
+            println!("What name would you like?");
+            let mut username = String::new();
+
+            io::stdin()
+                .read_line(&mut username)
+                .expect("Error reading user input.");
+
+            // create user and write defualt config
+            let user = app
+                .handlers
+                .user
+                .create(
+                    NewUserReq {
+                        username: username.trim().to_string(),
+                    }
+                    .into_request(),
+                )
+                .await?
+                .into_inner();
+
+            app.config.users.push(user.clone().into());
+            app.cache.user = Some(user.into());
+
+            app.cache.write(&app.paths);
+            app.config.write(&app.paths);
+
+            println!(
+                "Config file written to {}",
+                &app.paths
+                    .config_file_path
+                    .to_str()
+                    .ok_or(Error::from("unable to parse config file path into string"))?
+            );
+        }
     }
 
     Ok(())
