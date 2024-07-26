@@ -15,7 +15,7 @@ message Msg {
     User author = 3;
     User recipient = 4;
     string body = 5;
-    int64 unix_time = 6;
+    uint64 unix_time = 6;
     bool isRead = 7;
 }
 
@@ -24,13 +24,17 @@ message MsgList {
 }
 
 service MsgService {
-    rpc Send(Msg) returns (MsgSendRes);
+    rpc Send(MsgSendReq) returns (Msg);
     rpc Search(MsgFetchReq) returns(MsgList);
 }
 
-message MsgSendRes {
-    bool success = 1;
+message MsgSendReq {
+    Convo convo = 1;
+    User author = 2;
+    string body = 3;
+    uint64 unix_time = 4;
 }
+
 
 message MsgFetchReq {
     MsgFetchKindBy kind = 1;

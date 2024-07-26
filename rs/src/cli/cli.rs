@@ -1,5 +1,7 @@
 #![allow(unused)] // just for convenience, can remove later
 
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use super::args::{
     Commands, ConversationArgs, MessageVariants, SearchVariants, UserArgs, UserVariants,
 };
@@ -9,31 +11,70 @@ use crate::{
         config::{self, Config, ConfigUser},
         Paths,
     },
-    grpc::NewUserReq,
+    grpc::{Msg, MsgSendReq, NewUserReq},
     AppState, Error, Handlers, Result,
 };
 
-use clap::Parser;
+use clap::{CommandFactory, Parser};
 use colored::Colorize;
-use tonic::Request;
+use tonic::{IntoRequest, Request};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
-    command: Commands,
+    command: Option<Commands>,
 
     /// A quick way to send a message into the current conversation, if it exists.
+    #[arg(short, long)]
     message: Option<String>,
 }
 
 impl Cli {
     pub async fn run(self, app: &mut AppState) -> Result<()> {
-        match self.command {
+        if let Some(message) = self.message {
+            print!("{}", message);
+            return Ok(());
+        } else if self.command.is_none() {
+            Cli::command().print_help();
+            return Ok(());
+        }
+
+        match self.command.unwrap() {
             Commands::Init {} => handle_init(app),
             // Commands::Send { message, recepient } => send(message, recepient),
             Commands::Message(msg_args) => match msg_args.command {
-                MessageVariants::Send { message } => Ok(()),
+                MessageVariants::Send { message } => {
+                    let res = app
+                    .handlers
+                    .msg
+                    .send(
+                        MsgSendReq {
+                            body: message,
+                            convo: Some(
+                                app.cache
+                                    .convo
+                                    .clone()
+                                    .ok_or(Error::from(
+                                        "Please select convo first before trying to send a message",
+                                    ))?
+                                    .try_into()?,
+                            ),
+
+                            author: Some(
+                                app.cache
+                                    .user
+                                    .clone()
+                                    .ok_or(Error::from("user does not exist in cache"))?
+                                .into()
+                            ),
+                            unix_time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
+                        }
+                        .into_request(),
+                    ).await?;
+
+                    Ok(())
+                }
                 MessageVariants::List { all } => {
                     todo!()
                 }
@@ -67,6 +108,8 @@ async fn handle_user(user_args: UserArgs, app: &mut AppState) -> Result<()> {
                     .into_inner();
 
                 app.config.users.push(new_user.clone().into());
+                println!("{}", "New User Created!".green());
+
                 app.cache.user = Some(new_user.into());
                 app.config.write(&app.paths);
                 app.cache.write(&app.paths);

@@ -27,7 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MsgServiceClient interface {
-	Send(ctx context.Context, in *Msg, opts ...grpc.CallOption) (*MsgSendRes, error)
+	Send(ctx context.Context, in *MsgSendReq, opts ...grpc.CallOption) (*Msg, error)
 	Search(ctx context.Context, in *MsgFetchReq, opts ...grpc.CallOption) (*MsgList, error)
 }
 
@@ -39,8 +39,8 @@ func NewMsgServiceClient(cc grpc.ClientConnInterface) MsgServiceClient {
 	return &msgServiceClient{cc}
 }
 
-func (c *msgServiceClient) Send(ctx context.Context, in *Msg, opts ...grpc.CallOption) (*MsgSendRes, error) {
-	out := new(MsgSendRes)
+func (c *msgServiceClient) Send(ctx context.Context, in *MsgSendReq, opts ...grpc.CallOption) (*Msg, error) {
+	out := new(Msg)
 	err := c.cc.Invoke(ctx, MsgService_Send_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (c *msgServiceClient) Search(ctx context.Context, in *MsgFetchReq, opts ...
 // All implementations must embed UnimplementedMsgServiceServer
 // for forward compatibility
 type MsgServiceServer interface {
-	Send(context.Context, *Msg) (*MsgSendRes, error)
+	Send(context.Context, *MsgSendReq) (*Msg, error)
 	Search(context.Context, *MsgFetchReq) (*MsgList, error)
 	mustEmbedUnimplementedMsgServiceServer()
 }
@@ -70,7 +70,7 @@ type MsgServiceServer interface {
 type UnimplementedMsgServiceServer struct {
 }
 
-func (UnimplementedMsgServiceServer) Send(context.Context, *Msg) (*MsgSendRes, error) {
+func (UnimplementedMsgServiceServer) Send(context.Context, *MsgSendReq) (*Msg, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Send not implemented")
 }
 func (UnimplementedMsgServiceServer) Search(context.Context, *MsgFetchReq) (*MsgList, error) {
@@ -90,7 +90,7 @@ func RegisterMsgServiceServer(s grpc.ServiceRegistrar, srv MsgServiceServer) {
 }
 
 func _MsgService_Send_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Msg)
+	in := new(MsgSendReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func _MsgService_Send_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: MsgService_Send_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServiceServer).Send(ctx, req.(*Msg))
+		return srv.(MsgServiceServer).Send(ctx, req.(*MsgSendReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }

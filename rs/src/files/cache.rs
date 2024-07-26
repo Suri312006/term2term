@@ -9,18 +9,20 @@ use super::{config::ConfigUser, Paths};
 
 use crate::{Error, Result};
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct ConfigConvo {
     pub id: String,
-    pub user1_id: String,
-    pub user2_id: String,
+    pub participants: Option<Vec<ConfigUser>>,
+    pub created_at: String,
+    
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Cache {
     pub convo: Option<ConfigConvo>,
     pub user: Option<ConfigUser>,
 }
+
 
 impl Cache {
     pub fn read(paths: &Paths) -> Result<Cache> {

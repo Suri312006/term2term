@@ -6,33 +6,24 @@ use std::{
 use serde::{Deserialize, Serialize};
 
 use super::Paths;
-use crate::{grpc::User, Error, Result};
+use crate::{Error, Result};
 
-#[derive(Deserialize, Serialize, Debug, Default)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone)]
 pub struct ConfigUser {
     pub username: String,
     pub id: String,
 }
 
-#[derive(Deserialize, Serialize, Debug, Default)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone)]
 pub struct Config {
     pub theme: Theme,
     pub users: Vec<ConfigUser>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Default)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone)]
 pub enum Theme {
     #[default]
     Default,
-}
-
-impl From<User> for ConfigUser {
-    fn from(value: User) -> Self {
-        ConfigUser {
-            username: value.name,
-            id: value.id,
-        }
-    }
 }
 
 impl Config {
