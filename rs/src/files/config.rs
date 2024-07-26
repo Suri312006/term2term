@@ -43,7 +43,7 @@ impl Config {
     }
 
     pub fn check_existing(paths: &Paths) -> Result<bool> {
-        match File::open(&paths.config_file_path.clone()) {
+        match File::open(&paths.config_file_path) {
             Ok(_) => Ok(true),
             Err(err) => {
                 if err.kind() == ErrorKind::NotFound {

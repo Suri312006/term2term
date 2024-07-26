@@ -1,8 +1,8 @@
 use std::vec;
 
 use crate::{
-    files::{config::ConfigUser, ConfigConvo},
-    grpc::{Convo, Participants, User},
+    files::ConfigConvo,
+    grpc::{Convo, Participants},
 };
 
 impl TryFrom<Convo> for ConfigConvo {
@@ -39,22 +39,5 @@ impl TryFrom<ConfigConvo> for Convo {
             participants: Some(Participants { users }),
             created_at: value.created_at,
         })
-    }
-}
-
-impl From<User> for ConfigUser {
-    fn from(value: User) -> Self {
-        ConfigUser {
-            username: value.name,
-            id: value.id,
-        }
-    }
-}
-impl From<ConfigUser> for User {
-    fn from(value: ConfigUser) -> Self {
-        User {
-            name: value.username,
-            id: value.id,
-        }
     }
 }

@@ -7,12 +7,12 @@ use super::args::{
 };
 use crate::{
     app,
-    args::MessageArgs,
+    args::{MessageArgs, SearchArgs},
     files::{
         config::{self, Config, ConfigUser},
         Paths,
     },
-    grpc::{Msg, MsgSendReq, NewUserReq},
+    grpc::{Msg, MsgSendReq, NewUserReq, User},
     AppState, Error, Handlers, Result,
 };
 
@@ -40,31 +40,53 @@ impl Cli {
                 },
                 app,
             )
-            .await?
+            .await?;
+            return Ok(());
         } else if self.command.is_none() {
             Cli::command().print_help();
             return Ok(());
         }
 
         match self.command.unwrap() {
-            Commands::Init {} => handle_init(app),
-            // Commands::Send { message, recepient } => send(message, recepient),
+            Commands::Init {} => handle_init(app).await,
             Commands::Message(msg_args) => handle_message(msg_args, app).await,
-
-            Commands::Search(search_args) => match search_args.command {
-                SearchVariants::Messages { query } => todo!(),
-                SearchVariants::Friends { query } => todo!(),
-                SearchVariants::Users { query } => todo!(),
-            },
-            Commands::Conversation(convo_args) => handle_convo(convo_args),
+            Commands::Search(search_args) => handle_search(search_args, app).await,
+            Commands::Conversation(convo_args) => handle_convo(convo_args, app).await,
             Commands::User(user_args) => handle_user(user_args, app).await,
         }
     }
 }
 
-fn handle_init(app: &mut AppState) -> Result<()> {
+async fn handle_init(app: &mut AppState) -> Result<()> {
     println!("{}", "Starting Initialziation.".green());
-    todo!()
+
+    match Config::check_existing(&app.paths)? {
+        // already exists
+        true => {
+            println!("{}", "Found existing config file.".green());
+
+            println!("{}", "Verifying Config File".green());
+            for user in app.config.users.clone() {
+                let res = app
+                    .handlers
+                    .user
+                    .verify(<ConfigUser as Into<User>>::into(user.clone()).into_request())
+                    .await?
+                    .into_inner();
+
+                if !res.verified {
+                    println!(
+                        "{}",
+                        format!("WARNING: User not verified {:?}, could be malformed?", user).red()
+                    );
+                }
+            }
+        }
+
+        false => todo!(),
+    }
+
+    Ok(())
 }
 
 async fn handle_user(user_args: UserArgs, app: &mut AppState) -> Result<()> {
@@ -95,8 +117,12 @@ async fn handle_user(user_args: UserArgs, app: &mut AppState) -> Result<()> {
     }
 }
 
-fn handle_convo(lol: ConversationArgs) -> Result<()> {
-    todo!()
+async fn handle_convo(convo_args: ConversationArgs, app: &mut AppState) -> Result<()> {
+    todo!("Working on search handler god damn")
+}
+
+async fn handle_search(search_args: SearchArgs, app: &mut AppState) -> Result<()> {
+    todo!("Working on search handler god damn")
 }
 
 async fn handle_message(msg_args: MessageArgs, app: &mut AppState) -> Result<()> {

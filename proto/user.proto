@@ -16,7 +16,7 @@ message UserList {
 
 service UserService {
     rpc Create(NewUserReq) returns (User);
-    rpc Verify(VerifyUserReq) returns (VerifyUserRes);
+    rpc Verify(User) returns (VerifyUserRes);
     rpc Search(User) returns (UserList);
 }
 
