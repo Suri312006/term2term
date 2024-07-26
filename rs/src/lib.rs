@@ -1,3 +1,4 @@
+mod app;
 mod cli;
 mod client;
 mod error;
@@ -13,4 +14,5 @@ pub mod grpc {
 pub use client::*;
 pub use error::{Error, Result};
 
+pub use app::*;
 pub use cli::*;

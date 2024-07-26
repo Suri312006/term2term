@@ -8,6 +8,7 @@ use crate::{
     Result,
 };
 
+#[derive(Debug)]
 pub struct Handlers {
     pub user: UserServiceClient<Channel>,
     pub convo: ConvoServiceClient<Channel>,

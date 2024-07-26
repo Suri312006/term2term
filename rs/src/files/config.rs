@@ -36,10 +36,8 @@ impl From<User> for ConfigUser {
 }
 
 impl Config {
-    pub fn read() -> Result<Config> {
-        let paths = Paths::new()?;
-
-        let mut cfg_file = match File::open(paths.config_file_path) {
+    pub fn read(paths: &Paths) -> Result<Config> {
+        let mut cfg_file = match File::open(&paths.config_file_path) {
             Ok(file) => file,
             // file probably didnt exist, just return default and call it a day
             Err(_) => return Ok(Config::default()),
@@ -53,9 +51,8 @@ impl Config {
         Ok(config)
     }
 
-    pub fn check_existing() -> Result<bool> {
-        let paths = Paths::new()?;
-        match File::open(paths.config_file_path.clone()) {
+    pub fn check_existing(paths: &Paths) -> Result<bool> {
+        match File::open(&paths.config_file_path.clone()) {
             Ok(_) => Ok(true),
             Err(err) => {
                 if err.kind() == ErrorKind::NotFound {
@@ -69,9 +66,7 @@ impl Config {
 
     //TODO: i would really like to use toml_edit to do this so comments and stuff
     //are preserved but it is what it is you know
-    pub fn write(&self) -> Result<()> {
-        let paths = Paths::new()?;
-
+    pub fn write(&self, paths: &Paths) -> Result<()> {
         match create_dir(&paths.t2t_dir_path) {
             Ok(()) => {}
             Err(err) => {

@@ -4,12 +4,13 @@ use super::args::{
     Commands, ConversationArgs, MessageVariants, SearchVariants, UserArgs, UserVariants,
 };
 use crate::{
+    app,
     files::{
         config::{self, Config, ConfigUser},
         Paths,
     },
     grpc::NewUserReq,
-    Error, Handlers, Result,
+    AppState, Error, Handlers, Result,
 };
 
 use clap::Parser;
@@ -27,9 +28,9 @@ pub struct Cli {
 }
 
 impl Cli {
-    pub async fn run(self, handlers: &mut Handlers) -> Result<()> {
+    pub async fn run(self, app: &mut AppState) -> Result<()> {
         match self.command {
-            Commands::Init {} => handle_init(handlers),
+            Commands::Init {} => handle_init(app),
             // Commands::Send { message, recepient } => send(message, recepient),
             Commands::Message(msg_args) => match msg_args.command {
                 MessageVariants::Send { message } => Ok(()),
@@ -44,30 +45,31 @@ impl Cli {
                 SearchVariants::Users { query } => todo!(),
             },
             Commands::Conversation(convo_args) => handle_convo(convo_args),
-            Commands::User(user_args) => handle_user(user_args, handlers).await,
+            Commands::User(user_args) => handle_user(user_args, app).await,
         }
     }
 }
 
-fn handle_init(handlers: &mut Handlers) -> Result<()> {
+fn handle_init(app: &mut AppState) -> Result<()> {
     println!("{}", "Starting Initialziation.".green());
     todo!()
 }
 
-async fn handle_user(user_args: UserArgs, handlers: &mut Handlers) -> Result<()> {
+async fn handle_user(user_args: UserArgs, app: &mut AppState) -> Result<()> {
     if let Some(cmd) = user_args.command {
         match cmd {
             UserVariants::New { username } => {
-                let new_user = handlers
+                let new_user = app
+                    .handlers
                     .user
                     .create(Request::new(NewUserReq { username }))
                     .await?
                     .into_inner();
 
-                let mut conf = Config::read()?;
-                conf.users.push(new_user.into());
-
-                conf.write();
+                app.config.users.push(new_user.clone().into());
+                app.cache.user = Some(new_user.into());
+                app.config.write(&app.paths);
+                app.cache.write(&app.paths);
 
                 Ok(())
             }
