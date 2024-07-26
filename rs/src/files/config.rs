@@ -38,7 +38,6 @@ impl From<User> for ConfigUser {
 impl Config {
     pub fn read() -> Result<Config> {
         let paths = Paths::new()?;
-        // let mut cfg_file = File::open(paths.config_file_path);
 
         let mut cfg_file = match File::open(paths.config_file_path) {
             Ok(file) => file,

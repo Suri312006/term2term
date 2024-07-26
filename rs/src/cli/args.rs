@@ -2,7 +2,6 @@
 
 use clap::{Args, Parser, Subcommand};
 
-
 #[derive(Subcommand, Debug)]
 #[command(args_conflicts_with_subcommands = true)]
 pub enum Commands {
@@ -30,16 +29,19 @@ pub struct SearchArgs {
 
 #[derive(Debug, Subcommand)]
 pub enum SearchVariants {
+    /// search for messages
     Messages {
         #[arg(short, long)]
         query: String,
     },
 
+    /// search for friends
     Friends {
         #[arg(short, long)]
         query: String,
     },
 
+    /// search for Term2Term users
     Users {
         #[arg(short, long)]
         query: String,
@@ -57,7 +59,11 @@ pub struct ConversationArgs {
 pub enum ConversationVariants {
     /// Selects the current conversation.
     Select,
+
+    /// View all conversations
     List,
+
+    // start a new conversation!
     Start,
 }
 
@@ -76,6 +82,7 @@ pub enum MessageVariants {
         message: String,
     },
 
+    /// List Unread Messages
     List {
         #[arg(short, long, default_value_t = false)]
         all: bool,
@@ -94,11 +101,13 @@ pub struct UserArgs {
 
 #[derive(Debug, Subcommand)]
 pub enum UserVariants {
+    /// Create a new user
     New {
         #[arg(short, long)]
         username: String,
     },
 
+    /// switch to another account
     Switch {
         #[arg(short, long)]
         username: Option<String>,

@@ -1,6 +1,6 @@
-mod error;
 mod cli;
 mod client;
+mod error;
 
 pub mod files;
 pub mod utils;
@@ -10,7 +10,7 @@ pub mod grpc {
 }
 
 // flatten
-pub use error::{Error, Result};
 pub use client::*;
+pub use error::{Error, Result};
 
 pub use cli::*;
