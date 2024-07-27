@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/suri312006/term2term/v2/internal/convert"
@@ -26,16 +27,18 @@ func (s MsgServer) Send(ctx context.Context, msg *v2.MsgSendReq) (*v2.Msg, error
 	log.Tracef("Preparing to save message")
 
 	var other *v2.User
+	fmt.Printf("num of users: %v", len(msg.Convo.Participants.Users))
 
-	for _, v := range msg.Convo.Participants.Users {
-
+	for i, v := range msg.Convo.Participants.Users {
+		fmt.Printf("user %d : %v|n", i, v)
 		if v.Id != msg.Author.Id {
 			other = v
 		}
 
 	}
 
-	log.Printf("%v|n", msg.Author)
+	log.Printf("author: %v|n", msg.Author)
+	log.Printf("other: %v|n", other)
 
 	dbMsg := db.Message{
 		PubId:       id.Must(),

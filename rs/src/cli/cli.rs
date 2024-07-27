@@ -17,8 +17,8 @@ use crate::{
         Paths,
     },
     grpc::{
-        self, ConvoList, ListConvoReq, Msg, MsgSendReq, NewConvoReq, NewUserReq, Participants,
-        SearchUserReq, User,
+        self, Convo, ConvoList, ListConvoReq, Msg, MsgSendReq, NewConvoReq, NewUserReq,
+        Participants, SearchUserReq, User,
     },
     AppState, Error, Handlers, Result,
 };
@@ -221,7 +221,6 @@ async fn handle_convo(convo_args: ConversationArgs, app: &mut AppState) -> Resul
                 .await?
                 .into_inner();
 
-
             app.cache.convo = Some(new_convo.try_into()?);
             app.cache.write(&app.paths);
 
@@ -275,6 +274,15 @@ async fn handle_search(search_args: SearchArgs, app: &mut AppState) -> Result<()
 async fn handle_message(msg_args: MessageArgs, app: &mut AppState) -> Result<()> {
     match msg_args.command {
         MessageVariants::Send { message } => {
+            let convo: Convo = app
+                .cache
+                .convo
+                .clone()
+                .ok_or(Error::from(
+                    "Please select convo first before trying to send a message",
+                ))?
+                .try_into()?;
+
             let res = app
                 .handlers
                 .msg

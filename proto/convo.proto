@@ -13,7 +13,7 @@ message Participants {
 message Convo {
     string id = 1;
     Participants participants = 2;
-    string createdAt = 3;
+    uint64 createdAt = 3;
 }
 
 message ConvoList {

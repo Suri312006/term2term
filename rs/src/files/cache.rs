@@ -13,7 +13,7 @@ use crate::{Error, Result};
 pub struct ConfigConvo {
     pub id: String,
     pub participants: Option<Vec<ConfigUser>>,
-    pub created_at: String,
+    pub created_at: u64,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -86,7 +86,7 @@ fn create_cache(paths: &Paths) -> Result<Cache> {
         user: None,
     };
 
-    let file_data = toml::to_string(&cache)?;
+    let file_data = ron::to_string(&cache)?;
 
     cache_f.write_all(file_data.as_bytes())?;
 

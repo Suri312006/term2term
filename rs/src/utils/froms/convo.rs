@@ -1,6 +1,5 @@
 use std::vec;
 
-use crate::grpc::User;
 use crate::{
     files::ConfigConvo,
     grpc::{Convo, Participants},
@@ -27,15 +26,52 @@ impl TryFrom<Convo> for ConfigConvo {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use crate::{
+        files::ConfigConvo,
+        grpc::{Convo, Participants, User},
+    };
+
+    #[test]
+    fn convo_conversions() {
+        let convo = Convo {
+            id: "id".to_string(),
+            participants: Some(Participants {
+                users: vec![
+                    User {
+                        id: "lmao".to_string(),
+                        name: "xd".to_string(),
+                    },
+                    User {
+                        id: "lmao".to_string(),
+                        name: "xd".to_string(),
+                    },
+                ],
+            }),
+            created_at: 123456,
+        };
+
+        let config_convo: ConfigConvo = convo.clone().try_into().unwrap();
+
+        let convo2: Convo = config_convo.try_into().unwrap();
+
+        assert!(convo2 == convo);
+    }
+}
+
 impl TryFrom<ConfigConvo> for Convo {
     type Error = &'static str;
     fn try_from(value: ConfigConvo) -> std::result::Result<Self, Self::Error> {
         let mut users = vec![];
-        let _ = value
+
+        for user in value
             .participants
-            .ok_or("unable to parse participants from conversation")?
+            .ok_or("Unable to parse participants from conversation")?
             .into_iter()
-            .map(|user| users.push(user.into()));
+        {
+            users.push(user.into());
+        }
 
         Ok(Convo {
             id: value.id,
