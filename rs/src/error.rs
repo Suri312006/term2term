@@ -1,4 +1,3 @@
-use std::convert::Infallible;
 
 use derive_more::From;
 

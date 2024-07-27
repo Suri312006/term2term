@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use super::{config::ConfigUser, Paths};
 
 use color_eyre::{
-    eyre::{eyre, Error},
+    eyre::{eyre},
     Result,
 };
 
