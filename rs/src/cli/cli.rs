@@ -221,6 +221,7 @@ async fn handle_convo(convo_args: ConversationArgs, app: &mut AppState) -> Resul
                 .await?
                 .into_inner();
 
+
             app.cache.convo = Some(new_convo.try_into()?);
             app.cache.write(&app.paths);
 

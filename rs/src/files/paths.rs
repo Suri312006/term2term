@@ -18,7 +18,7 @@ impl Paths {
         let t2t_dir =
             PathBuf::from(String::from_str(home_path.to_str().unwrap())? + "/.config/term2term");
         let cfg_fp: PathBuf = [t2t_dir.to_str().unwrap(), "config.toml"].iter().collect();
-        let cache_fp: PathBuf = [t2t_dir.to_str().unwrap(), "cache.toml"].iter().collect();
+        let cache_fp: PathBuf = [t2t_dir.to_str().unwrap(), "cache.ron"].iter().collect();
         Ok(Paths {
             t2t_dir_path: t2t_dir,
             config_file_path: cfg_fp,

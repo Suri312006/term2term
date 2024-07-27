@@ -30,7 +30,9 @@ func (s UserServer) Verify(ctx context.Context, req *v2.User) (*v2.VerifyUserRes
 
 	foundUser := db.User{}
 
-	dbSesh.Query(&userQuery, &foundUser)
+	if err := dbSesh.Query(&userQuery, &foundUser); err != nil {
+
+	}
 
 	if foundUser.PubId != "" {
 		return &v2.VerifyUserRes{Verified: true}, nil

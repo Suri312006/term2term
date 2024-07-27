@@ -4,9 +4,9 @@ import (
 	"context"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/suri312006/term2term/v2/internal/convert"
 	"github.com/suri312006/term2term/v2/internal/db"
 	"github.com/suri312006/term2term/v2/internal/id"
-	"github.com/suri312006/term2term/v2/internal/convert"
 	m "github.com/suri312006/term2term/v2/pkg/middleware"
 	v2 "github.com/suri312006/term2term/v2/proto-gen"
 	"google.golang.org/grpc/codes"
@@ -36,16 +36,6 @@ func (s ConvoServer) Create(ctx context.Context, req *v2.NewConvoReq) (*v2.Convo
 		log.Errorf("Unable to execute db save on conversation: %v", err)
 		return nil, status.Error(codes.Internal, "dont worry about it fr")
 	}
-	final := &v2.Convo{
-		Id: convo.PubId,
-		Participants: &v2.Participants{
-			Users: []*v2.User{
-				convert.DbUser2User(convo.User1),
-				convert.DbUser2User(convo.User2),
-			},
-		},
-	}
 
-	return final, nil
+	return convert.DbConvo2Convo(convo), nil
 }
-

@@ -34,12 +34,11 @@ impl Cache {
                 // file already exists so uhhh, what now??
                 let mut file_buf = String::new();
                 file.read_to_string(&mut file_buf)?;
-                let cache: Cache = toml::from_str(file_buf.as_str())?;
+                let cache: Cache = ron::from_str(file_buf.as_str())?;
                 cache
             }
             Err(err) => {
                 if ErrorKind::NotFound == err.kind() {
-                    println!("cache not found");
                     create_cache(paths)?
                 } else {
                     return Err(Error::from("Something went wrong when reading from cache."));
@@ -68,8 +67,9 @@ impl Cache {
             },
         }?;
 
-        let cache_data = toml::to_string(&self)?;
-        cache_f.write_all(cache_data.as_bytes())?;
+        let ron_data = ron::to_string(&self)?;
+
+        cache_f.write_all(ron_data.as_bytes())?;
         Ok(())
     }
 
