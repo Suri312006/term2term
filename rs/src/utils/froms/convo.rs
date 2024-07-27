@@ -34,7 +34,7 @@ mod tests {
     };
 
     #[test]
-    fn convo_conversions() {
+    fn check_conversion() {
         let convo = Convo {
             id: "id".to_string(),
             participants: Some(Participants {

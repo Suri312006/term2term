@@ -6,8 +6,7 @@ use std::{
 use serde::{Deserialize, Serialize};
 
 use super::Paths;
-use crate::{Error, Result};
-
+use color_eyre::{eyre::eyre, Result};
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 pub struct ConfigUser {
     pub username: String,
@@ -50,7 +49,7 @@ impl Config {
                     return Ok(false);
                 }
 
-                Err(Error::from(err.to_string()))
+                Err(eyre!(err))
             }
         }
     }
@@ -62,10 +61,7 @@ impl Config {
             Ok(()) => {}
             Err(err) => {
                 if err.kind() != ErrorKind::AlreadyExists {
-                    return Err(Error::from(format!(
-                        "Weird error while creating directory. {}",
-                        err,
-                    )));
+                    return Err(eyre!(err));
                 }
             }
         };
@@ -80,10 +76,7 @@ impl Config {
 
             Err(err) => match err.kind() {
                 ErrorKind::NotFound => Ok(File::create(&paths.config_file_path).unwrap()),
-                _ => Err(Error::from(format!(
-                    "there was an error trying to write defualt config file {}",
-                    err
-                ))),
+                _ => Err(eyre!(err)),
             },
         }?;
 

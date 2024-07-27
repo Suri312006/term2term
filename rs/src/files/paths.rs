@@ -1,6 +1,6 @@
 use std::{path::PathBuf, str::FromStr};
 
-use crate::{Error, Result};
+use color_eyre::{eyre::eyre, Result};
 use serde::{Deserialize, Serialize};
 use xdg_home::home_dir;
 
@@ -14,7 +14,7 @@ pub struct Paths {
 
 impl Paths {
     pub fn new() -> Result<Paths> {
-        let home_path = home_dir().ok_or(Error::from("Home Directory Not found"))?;
+        let home_path = home_dir().ok_or(eyre!("Home Directory Not found"))?;
         let t2t_dir =
             PathBuf::from(String::from_str(home_path.to_str().unwrap())? + "/.config/term2term");
         let cfg_fp: PathBuf = [t2t_dir.to_str().unwrap(), "config.toml"].iter().collect();

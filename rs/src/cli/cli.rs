@@ -20,8 +20,10 @@ use crate::{
         self, Convo, ConvoList, ListConvoReq, Msg, MsgSendReq, NewConvoReq, NewUserReq,
         Participants, SearchUserReq, User,
     },
-    AppState, Error, Handlers, Result,
+    AppState, Handlers,
 };
+
+use color_eyre::{eyre::eyre, Result, Section};
 
 use clap::{CommandFactory, Parser};
 use colored::Colorize;
@@ -123,7 +125,7 @@ async fn handle_init(app: &mut AppState) -> Result<()> {
                 &app.paths
                     .config_file_path
                     .to_str()
-                    .ok_or(Error::from("unable to parse config file path into string"))?
+                    .ok_or(eyre!("unable to parse config file path into string"))?
             );
         }
     }
@@ -155,7 +157,7 @@ async fn handle_user(user_args: UserArgs, app: &mut AppState) -> Result<()> {
             UserVariants::Switch { username } => Ok(todo!()),
         }
     } else {
-        Err(Error::from("No user arg passed in."))
+        Err(eyre!("No user arg passed in."))
     }
 }
 
@@ -213,7 +215,7 @@ async fn handle_convo(convo_args: ConversationArgs, app: &mut AppState) -> Resul
                             all_users
                                 .users
                                 .get(index)
-                                .ok_or(Error::from("yoooo what the sigma"))
+                                .ok_or(eyre!("yoooo what the sigma"))
                                 .cloned()?,
                         ],
                     }),
@@ -221,7 +223,7 @@ async fn handle_convo(convo_args: ConversationArgs, app: &mut AppState) -> Resul
                 .await?
                 .into_inner();
 
-            app.cache.convo = Some(new_convo.try_into()?);
+            app.cache.convo = Some(new_convo.try_into().map_err(|err: &str| eyre!(err))?);
             app.cache.write(&app.paths);
 
             Ok(())
@@ -252,9 +254,10 @@ async fn handle_convo(convo_args: ConversationArgs, app: &mut AppState) -> Resul
             app.cache.convo = Some(
                 convos
                     .get(index)
-                    .ok_or(Error::from("cant find the thing"))?
+                    .ok_or(eyre!("cant find the thing"))?
                     .to_owned()
-                    .try_into()?,
+                    .try_into()
+                    .map_err(|err: &str| eyre!(err))?,
             );
             app.cache.write(&app.paths);
 
@@ -278,10 +281,10 @@ async fn handle_message(msg_args: MessageArgs, app: &mut AppState) -> Result<()>
                 .cache
                 .convo
                 .clone()
-                .ok_or(Error::from(
-                    "Please select convo first before trying to send a message",
-                ))?
-                .try_into()?;
+                .ok_or(eyre!("Conversation not found in cache!",))
+                .suggestion("Please select convo first before trying to send a message")?
+                .try_into()
+                .map_err(|err: &str| eyre!(err))?;
 
             let res = app
                 .handlers
@@ -293,17 +296,19 @@ async fn handle_message(msg_args: MessageArgs, app: &mut AppState) -> Result<()>
                             app.cache
                                 .convo
                                 .clone()
-                                .ok_or(Error::from(
-                                    "Please select convo first before trying to send a message",
-                                ))?
-                                .try_into()?,
+                                .ok_or(eyre!("Conversation not found in cache!",))?
+                                .try_into()
+                                .map_err(|err: &str| eyre!(err))?,
                         ),
 
                         author: Some(
                             app.cache
                                 .user
                                 .clone()
-                                .ok_or(Error::from("user does not exist in cache"))?
+                                .ok_or(eyre!("user does not exist in cache"))
+                                .suggestion(
+                                    "Try running `user switch` to switch to your desired user",
+                                )?
                                 .into(),
                         ),
                         unix_time: SystemTime::now()

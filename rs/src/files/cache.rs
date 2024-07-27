@@ -7,7 +7,10 @@ use serde::{Deserialize, Serialize};
 
 use super::{config::ConfigUser, Paths};
 
-use crate::{Error, Result};
+use color_eyre::{
+    eyre::{eyre, Error},
+    Result,
+};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct ConfigConvo {
@@ -41,7 +44,7 @@ impl Cache {
                 if ErrorKind::NotFound == err.kind() {
                     create_cache(paths)?
                 } else {
-                    return Err(Error::from("Something went wrong when reading from cache."));
+                    return Err(eyre!("something went wrong!!"));
                 }
             }
         };
@@ -60,10 +63,7 @@ impl Cache {
 
             Err(err) => match err.kind() {
                 ErrorKind::NotFound => Ok(File::create(&paths.cache_file_path).unwrap()),
-                _ => Err(Error::from(format!(
-                    "there was an error trying to write cache {}",
-                    err
-                ))),
+                err => Err(eyre!(err)),
             },
         }?;
 
@@ -74,7 +74,7 @@ impl Cache {
     }
 
     pub fn curr_user(&self) -> Result<ConfigUser> {
-        self.user.clone().ok_or(Error::from("No user in cache."))
+        self.user.clone().ok_or(eyre!("no user in cache"))
     }
 }
 

@@ -1,7 +1,10 @@
 use crate::{
     files::{Cache, Config, Paths},
-    Handlers, Result,
+    Handlers,
 };
+
+use color_eyre::Result;
+
 
 #[derive(Debug)]
 pub struct AppState {
