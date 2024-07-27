@@ -5,7 +5,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use super::{config::ConfigUser, Paths};
+use super::{config::ConfigUser, Config, Paths};
 
 use crate::{Error, Result};
 
@@ -14,7 +14,6 @@ pub struct ConfigConvo {
     pub id: String,
     pub participants: Option<Vec<ConfigUser>>,
     pub created_at: String,
-    
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -23,12 +22,11 @@ pub struct Cache {
     pub user: Option<ConfigUser>,
 }
 
-
 impl Cache {
     pub fn read(paths: &Paths) -> Result<Cache> {
         let cache = match OpenOptions::new()
-            .truncate(true)
-            .write(true)
+            .truncate(false)
+            .write(false)
             .read(true)
             .open(&paths.cache_file_path)
         {
@@ -41,6 +39,7 @@ impl Cache {
             }
             Err(err) => {
                 if ErrorKind::NotFound == err.kind() {
+                    println!("cache not found");
                     create_cache(&paths)?
                 } else {
                     return Err(Error::from("Something went wrong when reading from cache."));
@@ -72,6 +71,10 @@ impl Cache {
         let cache_data = toml::to_string(&self)?;
         cache_f.write_all(cache_data.as_bytes())?;
         Ok(())
+    }
+
+    pub fn curr_user(&self) -> Result<ConfigUser> {
+        Ok(self.user.clone().ok_or(Error::from("No user in cache."))?)
     }
 }
 

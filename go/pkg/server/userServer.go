@@ -16,7 +16,7 @@ type UserServer struct {
 	v2.UnimplementedUserServiceServer
 }
 
-func (s UserServer) Verify(ctx context.Context, req *v2.VerifyUserReq) (*v2.VerifyUserRes, error) {
+func (s UserServer) Verify(ctx context.Context, req *v2.User) (*v2.VerifyUserRes, error) {
 
 	dbSesh := ctx.Value(m.DBSession).(*db.Dbm)
 	if dbSesh == nil {
@@ -40,13 +40,36 @@ func (s UserServer) Verify(ctx context.Context, req *v2.VerifyUserReq) (*v2.Veri
 
 }
 
-func (s UserServer) SearchUser(ctx context.Context, user *v2.User) (*v2.UserList, error) {
+func (s UserServer) Search(ctx context.Context, req *v2.SearchUserReq) (*v2.UserList, error) {
 	dbSesh := ctx.Value(m.DBSession).(*db.Dbm)
 	if dbSesh == nil {
 		log.Panic("database connection not provided")
 	}
 
-	return nil, status.Errorf(codes.Unimplemented, "method SearchUser not implemented")
+	// checking for all
+	if v2.UserSearchTypes_name[0] == req.Kind.String() {
+		users := []db.User{}
+		dbSesh.QueryAll(&users)
+
+		final := []*v2.User{}
+
+		for _, user := range users {
+			final = append(final, &v2.User{
+				Id:   user.PubId,
+				Name: user.Name,
+			})
+		}
+
+		return &v2.UserList{
+			Users: final,
+		}, nil
+
+	} else if true {
+		return nil, status.Errorf(codes.Unimplemented, "method Search not implemented for this type of query")
+	}
+
+	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented for this type of query")
+
 }
 
 func (s UserServer) Create(ctx context.Context, req *v2.NewUserReq) (*v2.User, error) {

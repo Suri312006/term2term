@@ -17,7 +17,18 @@ message UserList {
 service UserService {
     rpc Create(NewUserReq) returns (User);
     rpc Verify(User) returns (VerifyUserRes);
-    rpc Search(User) returns (UserList);
+    rpc Search(SearchUserReq) returns (UserList);
+}
+
+message SearchUserReq {
+    UserSearchTypes kind = 1;
+    optional User query = 2;
+}
+
+enum UserSearchTypes {
+    All = 0;
+    UserId = 1;
+    Name = 2;
 }
 
 message VerifyUserRes {

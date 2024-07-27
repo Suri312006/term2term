@@ -29,8 +29,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
 	Create(ctx context.Context, in *NewUserReq, opts ...grpc.CallOption) (*User, error)
-	Verify(ctx context.Context, in *VerifyUserReq, opts ...grpc.CallOption) (*VerifyUserRes, error)
-	Search(ctx context.Context, in *User, opts ...grpc.CallOption) (*UserList, error)
+	Verify(ctx context.Context, in *User, opts ...grpc.CallOption) (*VerifyUserRes, error)
+	Search(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*UserList, error)
 }
 
 type userServiceClient struct {
@@ -50,7 +50,7 @@ func (c *userServiceClient) Create(ctx context.Context, in *NewUserReq, opts ...
 	return out, nil
 }
 
-func (c *userServiceClient) Verify(ctx context.Context, in *VerifyUserReq, opts ...grpc.CallOption) (*VerifyUserRes, error) {
+func (c *userServiceClient) Verify(ctx context.Context, in *User, opts ...grpc.CallOption) (*VerifyUserRes, error) {
 	out := new(VerifyUserRes)
 	err := c.cc.Invoke(ctx, UserService_Verify_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -59,7 +59,7 @@ func (c *userServiceClient) Verify(ctx context.Context, in *VerifyUserReq, opts 
 	return out, nil
 }
 
-func (c *userServiceClient) Search(ctx context.Context, in *User, opts ...grpc.CallOption) (*UserList, error) {
+func (c *userServiceClient) Search(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*UserList, error) {
 	out := new(UserList)
 	err := c.cc.Invoke(ctx, UserService_Search_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -73,8 +73,8 @@ func (c *userServiceClient) Search(ctx context.Context, in *User, opts ...grpc.C
 // for forward compatibility
 type UserServiceServer interface {
 	Create(context.Context, *NewUserReq) (*User, error)
-	Verify(context.Context, *VerifyUserReq) (*VerifyUserRes, error)
-	Search(context.Context, *User) (*UserList, error)
+	Verify(context.Context, *User) (*VerifyUserRes, error)
+	Search(context.Context, *SearchUserReq) (*UserList, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -85,10 +85,10 @@ type UnimplementedUserServiceServer struct {
 func (UnimplementedUserServiceServer) Create(context.Context, *NewUserReq) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedUserServiceServer) Verify(context.Context, *VerifyUserReq) (*VerifyUserRes, error) {
+func (UnimplementedUserServiceServer) Verify(context.Context, *User) (*VerifyUserRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Verify not implemented")
 }
-func (UnimplementedUserServiceServer) Search(context.Context, *User) (*UserList, error) {
+func (UnimplementedUserServiceServer) Search(context.Context, *SearchUserReq) (*UserList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
@@ -123,7 +123,7 @@ func _UserService_Create_Handler(srv interface{}, ctx context.Context, dec func(
 }
 
 func _UserService_Verify_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VerifyUserReq)
+	in := new(User)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -135,13 +135,13 @@ func _UserService_Verify_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: UserService_Verify_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).Verify(ctx, req.(*VerifyUserReq))
+		return srv.(UserServiceServer).Verify(ctx, req.(*User))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _UserService_Search_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(User)
+	in := new(SearchUserReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -153,7 +153,7 @@ func _UserService_Search_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: UserService_Search_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).Search(ctx, req.(*User))
+		return srv.(UserServiceServer).Search(ctx, req.(*SearchUserReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }

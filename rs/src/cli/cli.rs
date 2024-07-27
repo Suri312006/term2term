@@ -1,7 +1,8 @@
-#![allow(unused)] // just for convenience, can remove later
+#![allow(unused)] // just for cOnvenience, can remove later
 
 use std::{
-    io,
+    io::{self, stdin, stdout, Write},
+    ops::Deref,
     time::{SystemTime, UNIX_EPOCH},
 };
 
@@ -10,17 +11,21 @@ use super::args::{
 };
 use crate::{
     app,
-    args::{MessageArgs, SearchArgs},
+    args::{ConversationVariants, MessageArgs, SearchArgs},
     files::{
         config::{self, Config, ConfigUser},
         Paths,
     },
-    grpc::{Msg, MsgSendReq, NewUserReq, User},
+    grpc::{
+        self, ConvoList, ListConvoReq, Msg, MsgSendReq, NewConvoReq, NewUserReq, Participants,
+        SearchUserReq, User,
+    },
     AppState, Error, Handlers, Result,
 };
 
 use clap::{CommandFactory, Parser};
 use colored::Colorize;
+use tokio::sync::watch;
 use tonic::{IntoRequest, Request};
 
 #[derive(Parser, Debug)]
@@ -138,11 +143,11 @@ async fn handle_user(user_args: UserArgs, app: &mut AppState) -> Result<()> {
                     .into_inner();
 
                 app.config.users.push(new_user.clone().into());
+                app.cache.user = Some(new_user.into());
                 println!("{}", "New User Created!".green());
 
-                app.cache.user = Some(new_user.into());
-                app.config.write(&app.paths);
-                app.cache.write(&app.paths);
+                app.config.write(&app.paths)?;
+                app.cache.write(&app.paths)?;
 
                 Ok(())
             }
@@ -155,11 +160,115 @@ async fn handle_user(user_args: UserArgs, app: &mut AppState) -> Result<()> {
 }
 
 async fn handle_convo(convo_args: ConversationArgs, app: &mut AppState) -> Result<()> {
-    todo!("Working on search handler god damn")
+    match convo_args.command {
+        ConversationVariants::List => {
+            let res = app
+                .handlers
+                .convo
+                .list(
+                    ListConvoReq {
+                        user: Some(app.cache.curr_user()?.into()),
+                    }
+                    .into_request(),
+                )
+                .await?
+                .into_inner();
+            for convo in res.convos {
+                println!("{:#?}", convo);
+            }
+            Ok(())
+        }
+        ConversationVariants::Start => {
+            let all_users = app
+                .handlers
+                .user
+                .search(
+                    SearchUserReq {
+                        kind: 0,
+                        query: None,
+                    }
+                    .into_request(),
+                )
+                .await?
+                .into_inner();
+            println!("Type the number of the user you would like to start a conversation with");
+
+            for (i, user) in all_users.users.clone().into_iter().enumerate() {
+                println!("{}: {}", i, user.name);
+            }
+
+            let mut buf = String::new();
+            let _ = stdout().flush();
+            stdin().read_line(&mut buf);
+
+            let index: usize = buf.trim().parse()?;
+
+            let new_convo = app
+                .handlers
+                .convo
+                .create(NewConvoReq {
+                    participants: Some(Participants {
+                        users: vec![
+                            app.cache.curr_user()?.into(),
+                            all_users
+                                .users
+                                .get(index)
+                                .ok_or(Error::from("yoooo what the sigma"))
+                                .cloned()?,
+                        ],
+                    }),
+                })
+                .await?
+                .into_inner();
+
+            app.cache.convo = Some(new_convo.try_into()?);
+            app.cache.write(&app.paths);
+
+            Ok(())
+        }
+        ConversationVariants::Select => {
+            let convos = app
+                .handlers
+                .convo
+                .list(ListConvoReq {
+                    user: Some(app.cache.curr_user()?.into()),
+                })
+                .await?
+                .into_inner()
+                .convos;
+
+            println!("Type the number of the conversation you want to switch to");
+
+            for (i, convo) in convos.clone().into_iter().enumerate() {
+                println!("{}: {:?}", i, convo.participants);
+            }
+
+            let mut buf = String::new();
+            let _ = stdout().flush();
+            stdin().read_line(&mut buf);
+
+            let index: usize = buf.trim().parse()?;
+
+            app.cache.convo = Some(
+                convos
+                    .get(index)
+                    .ok_or(Error::from("cant find the thing"))?
+                    .to_owned()
+                    .try_into()?,
+            );
+            app.cache.write(&app.paths);
+
+            Ok(())
+        }
+    }
 }
 
 async fn handle_search(search_args: SearchArgs, app: &mut AppState) -> Result<()> {
-    todo!("Working on search handler god damn")
+    match search_args.command {
+        SearchVariants::Users { query } => todo!(),
+        SearchVariants::Friends { query } => todo!(),
+        SearchVariants::Messages { query } => todo!(),
+    }
 }
 
 async fn handle_message(msg_args: MessageArgs, app: &mut AppState) -> Result<()> {
@@ -196,6 +305,7 @@ async fn handle_message(msg_args: MessageArgs, app: &mut AppState) -> Result<()>
                     .into_request(),
                 )
                 .await?;
+            println!("{}", "Message sent!".green());
 
             Ok(())
         }
