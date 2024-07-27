@@ -25,9 +25,13 @@ jobs:
         sudo mv protoc3/bin/protoc /usr/local/bin/
         sudo mv protoc3/include/* /usr/local/include/
         protoc --version
+        rustup target add x86_64-pc-windows-gnu
+        
 
     - name: Build
-      run: cd rs && cargo build --verbose --release
+      # build for windows
+      run: cd rs && cargo build --target x86_64-pc-windows-gnu --release 
+      run: cd rs && cargo build --release 
 
     - name: Run tests
       run: cd rs && cargo test --verbose
