@@ -64,7 +64,7 @@ impl Config {
                 if err.kind() != ErrorKind::AlreadyExists {
                     return Err(Error::from(format!(
                         "Weird error while creating directory. {}",
-                        err.to_string(),
+                        err,
                     )));
                 }
             }
@@ -82,7 +82,7 @@ impl Config {
                 ErrorKind::NotFound => Ok(File::create(&paths.config_file_path).unwrap()),
                 _ => Err(Error::from(format!(
                     "there was an error trying to write defualt config file {}",
-                    err.to_string()
+                    err
                 ))),
             },
         }?;

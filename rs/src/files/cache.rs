@@ -5,7 +5,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use super::{config::ConfigUser, Config, Paths};
+use super::{config::ConfigUser, Paths};
 
 use crate::{Error, Result};
 
@@ -40,7 +40,7 @@ impl Cache {
             Err(err) => {
                 if ErrorKind::NotFound == err.kind() {
                     println!("cache not found");
-                    create_cache(&paths)?
+                    create_cache(paths)?
                 } else {
                     return Err(Error::from("Something went wrong when reading from cache."));
                 }
@@ -63,7 +63,7 @@ impl Cache {
                 ErrorKind::NotFound => Ok(File::create(&paths.cache_file_path).unwrap()),
                 _ => Err(Error::from(format!(
                     "there was an error trying to write cache {}",
-                    err.to_string()
+                    err
                 ))),
             },
         }?;
@@ -74,7 +74,7 @@ impl Cache {
     }
 
     pub fn curr_user(&self) -> Result<ConfigUser> {
-        Ok(self.user.clone().ok_or(Error::from("No user in cache."))?)
+        self.user.clone().ok_or(Error::from("No user in cache."))
     }
 }
 
