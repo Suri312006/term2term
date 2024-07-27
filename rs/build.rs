@@ -1,6 +1,7 @@
 fn main() {
     tonic_build::configure()
         .build_client(true)
+        .protoc_arg("--experimental_allow_proto3_optional")
         .compile(
             &["../proto/msg.proto", "../proto/user.proto"],
             // this is where our proto files are
