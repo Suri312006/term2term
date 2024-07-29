@@ -84,6 +84,8 @@ func (s MsgServer) Search(ctx context.Context, req *v2.MsgSearchReq) (*v2.MsgLis
 
 		final := &v2.MsgList{}
 
+
+
 		for _, v := range msgs {
 			log.Tracef("sending message %v", v)
 			final.Messages = append(final.Messages, convert.DbMsg2Msg(v))

@@ -7,6 +7,7 @@ import (
 	"github.com/suri312006/term2term/v2/internal/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -59,7 +60,8 @@ func (m Dbm) Query(data, store interface{}) error {
 }
 
 func (m Dbm) GroupQuery(model, store interface{}) error {
-	res := m.db.Where(model).Find(store)
+		// res := m.db.Where(model).Find(store)
+	res := m.db.Preload(clause.Associations).Where(model).Find(store)
 	return res.Error
 }
 
