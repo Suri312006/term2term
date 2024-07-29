@@ -25,7 +25,7 @@ message MsgList {
 
 service MsgService {
     rpc Send(MsgSendReq) returns (Msg);
-    rpc Search(MsgFetchReq) returns(MsgList);
+    rpc Search(MsgSearchReq) returns(MsgList);
 }
 
 message MsgSendReq {
@@ -36,15 +36,15 @@ message MsgSendReq {
 }
 
 
-message MsgFetchReq {
-    MsgFetchKindBy kind = 1;
+message MsgSearchReq {
+    MsgSearchKindBy kind = 1;
     string id = 2;
     bool unread = 3;
     string convoId = 4;
-    string authorId = 5;
+    string userId = 5;
 }
 
-enum MsgFetchKindBy {
+enum MsgSearchKindBy {
     Id = 0;
     Unread = 1;
     ConvoId = 2;

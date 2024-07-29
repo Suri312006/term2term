@@ -66,11 +66,9 @@ func (s UserServer) Search(ctx context.Context, req *v2.SearchUserReq) (*v2.User
 			Users: final,
 		}, nil
 
-	} else if true {
+	} else {
 		return nil, status.Errorf(codes.Unimplemented, "method Search not implemented for this type of query")
 	}
-
-	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented for this type of query")
 
 }
 

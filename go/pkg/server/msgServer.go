@@ -62,10 +62,38 @@ func (s MsgServer) Send(ctx context.Context, msg *v2.MsgSendReq) (*v2.Msg, error
 
 	// return nil, status.Errorf(codes.Unimplemented, "method Send not implemented")
 }
-func (s MsgServer) Search(ctx context.Context, req *v2.MsgFetchReq) (*v2.MsgList, error) {
+func (s MsgServer) Search(ctx context.Context, req *v2.MsgSearchReq) (*v2.MsgList, error) {
 	dbSesh := ctx.Value(m.DBSession).(*db.Dbm)
 	if dbSesh == nil {
 		return nil, status.Error(codes.Internal, "no database connection found")
 	}
-	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented")
+
+	// fetch for unread
+	if v2.MsgSearchKindBy_name[1] == req.Kind.String() {
+
+		msgs := []db.Message{}
+
+		queryMsg := db.Message{
+			RecipientId: req.UserId,
+			Read:        false,
+		}
+
+		if err := dbSesh.GroupQuery(&queryMsg, &msgs); err != nil {
+			return nil, status.Error(codes.Internal, "database error")
+		}
+
+		final := &v2.MsgList{}
+
+		for _, v := range msgs {
+			log.Tracef("sending message %v", v)
+			final.Messages = append(final.Messages, convert.DbMsg2Msg(v))
+		}
+
+		return final, nil
+
+	} else {
+
+		return nil, status.Errorf(codes.Unimplemented, "method Search not implemented for your search kind")
+	}
+
 }

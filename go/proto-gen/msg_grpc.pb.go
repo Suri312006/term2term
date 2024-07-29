@@ -28,7 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MsgServiceClient interface {
 	Send(ctx context.Context, in *MsgSendReq, opts ...grpc.CallOption) (*Msg, error)
-	Search(ctx context.Context, in *MsgFetchReq, opts ...grpc.CallOption) (*MsgList, error)
+	Search(ctx context.Context, in *MsgSearchReq, opts ...grpc.CallOption) (*MsgList, error)
 }
 
 type msgServiceClient struct {
@@ -48,7 +48,7 @@ func (c *msgServiceClient) Send(ctx context.Context, in *MsgSendReq, opts ...grp
 	return out, nil
 }
 
-func (c *msgServiceClient) Search(ctx context.Context, in *MsgFetchReq, opts ...grpc.CallOption) (*MsgList, error) {
+func (c *msgServiceClient) Search(ctx context.Context, in *MsgSearchReq, opts ...grpc.CallOption) (*MsgList, error) {
 	out := new(MsgList)
 	err := c.cc.Invoke(ctx, MsgService_Search_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -62,7 +62,7 @@ func (c *msgServiceClient) Search(ctx context.Context, in *MsgFetchReq, opts ...
 // for forward compatibility
 type MsgServiceServer interface {
 	Send(context.Context, *MsgSendReq) (*Msg, error)
-	Search(context.Context, *MsgFetchReq) (*MsgList, error)
+	Search(context.Context, *MsgSearchReq) (*MsgList, error)
 	mustEmbedUnimplementedMsgServiceServer()
 }
 
@@ -73,7 +73,7 @@ type UnimplementedMsgServiceServer struct {
 func (UnimplementedMsgServiceServer) Send(context.Context, *MsgSendReq) (*Msg, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Send not implemented")
 }
-func (UnimplementedMsgServiceServer) Search(context.Context, *MsgFetchReq) (*MsgList, error) {
+func (UnimplementedMsgServiceServer) Search(context.Context, *MsgSearchReq) (*MsgList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented")
 }
 func (UnimplementedMsgServiceServer) mustEmbedUnimplementedMsgServiceServer() {}
@@ -108,7 +108,7 @@ func _MsgService_Send_Handler(srv interface{}, ctx context.Context, dec func(int
 }
 
 func _MsgService_Search_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgFetchReq)
+	in := new(MsgSearchReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func _MsgService_Search_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: MsgService_Search_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServiceServer).Search(ctx, req.(*MsgFetchReq))
+		return srv.(MsgServiceServer).Search(ctx, req.(*MsgSearchReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }

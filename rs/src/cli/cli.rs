@@ -17,8 +17,8 @@ use crate::{
         Paths,
     },
     grpc::{
-        self, Convo, ConvoList, ListConvoReq, Msg, MsgSendReq, NewConvoReq, NewUserReq,
-        Participants, SearchUserReq, User,
+        self, Convo, ConvoList, ListConvoReq, Msg, MsgSearchKindBy, MsgSearchReq, MsgSendReq,
+        NewConvoReq, NewUserReq, Participants, SearchUserReq, User,
     },
     AppState, Handlers,
 };
@@ -154,7 +154,33 @@ async fn handle_user(user_args: UserArgs, app: &mut AppState) -> Result<()> {
                 Ok(())
             }
 
-            UserVariants::Switch { username } => Ok(todo!()),
+            UserVariants::Switch { username } => {
+                println!("Please enter the number of the user you would like to switch to.");
+                for (i, user) in app.config.users.clone().into_iter().enumerate() {
+                    println!("{}: {:#?}", i, user);
+                }
+
+                let buf = String::new();
+
+                let mut buf = String::new();
+                let _ = stdout().flush();
+                stdin().read_line(&mut buf);
+
+                let idx: usize = buf.trim().parse()?;
+
+                app.cache.user = Some(
+                    app.config
+                        .users
+                        .get(idx)
+                        .ok_or(eyre!("selected user index does not exist!"))
+                        .suggestion("try passing in a real index value!")?
+                        .clone(),
+                );
+
+                app.cache.write(&app.paths);
+
+                Ok(())
+            }
         }
     } else {
         Err(eyre!("No user arg passed in."))
@@ -318,13 +344,39 @@ async fn handle_message(msg_args: MessageArgs, app: &mut AppState) -> Result<()>
                     }
                     .into_request(),
                 )
-                .await?;
+                .await?
+                .into_inner();
             println!("{}", "Message sent!".green());
 
             Ok(())
         }
-        MessageVariants::List { all } => {
-            todo!()
-        }
+        MessageVariants::List { all } => match all {
+            false => {
+                let msgs = app
+                    .handlers
+                    .msg
+                    .search(MsgSearchReq {
+                        id: "0".to_string(),
+                        convo_id: app
+                            .cache
+                            .convo
+                            .clone()
+                            .ok_or(eyre!("convo not found in cache"))?
+                            .id,
+                        user_id: app.cache.curr_user()?.id,
+                        unread: true,
+                        kind: MsgSearchKindBy::Unread.into(),
+                    })
+                    .await?
+                    .into_inner();
+
+                for msg in msgs.messages {
+                    println!("{:#?}", msg);
+                }
+
+                Ok(())
+            }
+            true => todo!("no support for listing all messages"),
+        },
     }
 }
