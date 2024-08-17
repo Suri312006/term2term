@@ -9,5 +9,4 @@ func AttachServers(s *grpc.Server) {
 	v2.RegisterUserServiceServer(s, &UserServer{})
 	v2.RegisterMsgServiceServer(s, &MsgServer{})
 	v2.RegisterConvoServiceServer(s, &ConvoServer{})
-
 }

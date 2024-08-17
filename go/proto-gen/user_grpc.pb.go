@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	UserService_Create_FullMethodName = "/t2t.UserService/Create"
-	UserService_Verify_FullMethodName = "/t2t.UserService/Verify"
-	UserService_Search_FullMethodName = "/t2t.UserService/Search"
+	UserService_Create_FullMethodName         = "/t2t.UserService/Create"
+	UserService_Verify_FullMethodName         = "/t2t.UserService/Verify"
+	UserService_Search_FullMethodName         = "/t2t.UserService/Search"
+	UserService_ChangeUsername_FullMethodName = "/t2t.UserService/ChangeUsername"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -31,6 +32,7 @@ type UserServiceClient interface {
 	Create(ctx context.Context, in *NewUserReq, opts ...grpc.CallOption) (*User, error)
 	Verify(ctx context.Context, in *User, opts ...grpc.CallOption) (*VerifyUserRes, error)
 	Search(ctx context.Context, in *SearchUserReq, opts ...grpc.CallOption) (*UserList, error)
+	ChangeUsername(ctx context.Context, in *ChangeNameReq, opts ...grpc.CallOption) (*User, error)
 }
 
 type userServiceClient struct {
@@ -68,6 +70,15 @@ func (c *userServiceClient) Search(ctx context.Context, in *SearchUserReq, opts 
 	return out, nil
 }
 
+func (c *userServiceClient) ChangeUsername(ctx context.Context, in *ChangeNameReq, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, UserService_ChangeUsername_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -75,6 +86,7 @@ type UserServiceServer interface {
 	Create(context.Context, *NewUserReq) (*User, error)
 	Verify(context.Context, *User) (*VerifyUserRes, error)
 	Search(context.Context, *SearchUserReq) (*UserList, error)
+	ChangeUsername(context.Context, *ChangeNameReq) (*User, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -90,6 +102,9 @@ func (UnimplementedUserServiceServer) Verify(context.Context, *User) (*VerifyUse
 }
 func (UnimplementedUserServiceServer) Search(context.Context, *SearchUserReq) (*UserList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented")
+}
+func (UnimplementedUserServiceServer) ChangeUsername(context.Context, *ChangeNameReq) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangeUsername not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -158,6 +173,24 @@ func _UserService_Search_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_ChangeUsername_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangeNameReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).ChangeUsername(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_ChangeUsername_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).ChangeUsername(ctx, req.(*ChangeNameReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -176,6 +209,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Search",
 			Handler:    _UserService_Search_Handler,
+		},
+		{
+			MethodName: "ChangeUsername",
+			Handler:    _UserService_ChangeUsername_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

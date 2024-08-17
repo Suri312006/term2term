@@ -2,6 +2,7 @@
 
 use std::{
     io::{self, stdin, stdout, Write},
+    iter,
     ops::Deref,
     time::{SystemTime, UNIX_EPOCH},
 };
@@ -17,13 +18,16 @@ use crate::{
         Paths,
     },
     grpc::{
-        self, Convo, ConvoList, ListConvoReq, Msg, MsgSearchKindBy, MsgSearchReq, MsgSendReq,
-        NewConvoReq, NewUserReq, Participants, SearchUserReq, User,
+        self, ChangeNameReq, Convo, ConvoList, ListConvoReq, Msg, MsgSearchKindBy, MsgSearchReq,
+        MsgSendReq, NewConvoReq, NewUserReq, Participants, SearchUserReq, User,
     },
     AppState, Handlers,
 };
 
-use color_eyre::{eyre::eyre, Result, Section};
+use color_eyre::{
+    eyre::{eyre, OptionExt},
+    Result, Section,
+};
 
 use clap::{CommandFactory, Parser};
 use colored::Colorize;
@@ -180,6 +184,43 @@ async fn handle_user(user_args: UserArgs, app: &mut AppState) -> Result<()> {
                 app.cache.write(&app.paths);
 
                 Ok(())
+            }
+
+            UserVariants::ChangeName { newname } => {
+                let res = app
+                    .handlers
+                    .user
+                    .change_username(ChangeNameReq { newname }.into_request())
+                    .await?
+                    .into_inner();
+                //TODO: what the fuck is happening
+                let mut conf_users: Vec<ConfigUser> = app.config.users.clone();
+                // .into_iter()
+                // .filter(|user| user.id == res.id)
+                // .collect();
+
+                // let mut inc = 1;
+                //
+                // for user in &conf_users {
+                //     if user.id == res.id {
+                //         let x = conf_users.remove(
+                //             conf_users
+                //                 .iter()
+                //                 .position(|iter_user| iter_user == user)
+                //                 .ok_or_eyre("This shouldnt be possible i guess")?,
+                //         );
+                //     }
+                // }
+
+                // if conf_users.len() != 1 {
+                //     return Err(eyre!("Something went terribly wrong")
+                //         .suggestion("Could be a corrupt config"));
+                // }
+
+                // let mut conf_user = conf_users.remove(1);
+                // conf_user.username = res.name;
+
+                todo!("working on it lmao")
             }
         }
     } else {

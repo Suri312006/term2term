@@ -18,6 +18,7 @@ service UserService {
     rpc Create(NewUserReq) returns (User);
     rpc Verify(User) returns (VerifyUserRes);
     rpc Search(SearchUserReq) returns (UserList);
+    rpc ChangeUsername(ChangeNameReq) returns (User);
 }
 
 message SearchUserReq {
@@ -42,4 +43,8 @@ message VerifyUserReq {
 
 message NewUserReq {
     string username = 1;
+}
+
+message ChangeNameReq {
+    string newname = 1;
 }

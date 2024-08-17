@@ -22,7 +22,7 @@ message ConvoList {
 
 service ConvoService {
     rpc Create(NewConvoReq) returns (Convo);
-    rpc List(ListConvoReq) returns (ConvoList);
+   rpc List(ListConvoReq) returns (ConvoList);
 }
 
 message NewConvoReq {

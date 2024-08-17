@@ -112,4 +112,9 @@ pub enum UserVariants {
         #[arg(short, long)]
         username: Option<String>,
     },
+
+    ChangeName {
+        #[arg(short, long)]
+        newname: String
+    }
 }

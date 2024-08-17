@@ -7,19 +7,19 @@ use serde::{Deserialize, Serialize};
 
 use super::Paths;
 use color_eyre::{eyre::eyre, Result};
-#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ConfigUser {
     pub username: String,
     pub id: String,
 }
 
-#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Config {
     pub theme: Theme,
     pub users: Vec<ConfigUser>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Theme {
     #[default]
     Default,

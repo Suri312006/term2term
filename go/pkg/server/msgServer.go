@@ -24,10 +24,10 @@ func (s MsgServer) Send(ctx context.Context, msg *v2.MsgSendReq) (*v2.Msg, error
 		return nil, status.Error(codes.Internal, "no database connection found")
 	}
 
-	log.Tracef("Preparing to save message")
+	log.Tracef("Preparing to save message\n")
 
 	var other *v2.User
-	fmt.Printf("num of users: %v", len(msg.Convo.Participants.Users))
+	log.Printf("num of users: %v\n", len(msg.Convo.Participants.Users))
 
 	for i, v := range msg.Convo.Participants.Users {
 		fmt.Printf("user %d : %v|n", i, v)
@@ -37,8 +37,8 @@ func (s MsgServer) Send(ctx context.Context, msg *v2.MsgSendReq) (*v2.Msg, error
 
 	}
 
-	log.Printf("author: %v|n", msg.Author)
-	log.Printf("other: %v|n", other)
+	log.Tracef("author: %v|n", msg.Author)
+	log.Tracef("other: %v|n", other)
 
 	dbMsg := db.Message{
 		PubId:       id.Must(),
