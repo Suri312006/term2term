@@ -1,0 +1,2 @@
+[workspace]
+members = ["t2t-client", "t2t-server"]

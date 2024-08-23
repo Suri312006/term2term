@@ -5,3 +5,8 @@ target/
 *.fls
 *.log
 *.synctex.gz
+
+
+# Added by cargo
+
+/target
