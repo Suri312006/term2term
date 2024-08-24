@@ -27,6 +27,7 @@ sea-orm = { version = "1.0.0-rc.5", features = [
     "runtime-tokio-native-tls",
     "macros",
     "debug-print",
+    "mock"
 ] }
 dotenvy = "0.15.7"
 nanoid = "0.4.0"

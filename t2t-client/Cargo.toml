@@ -3,6 +3,14 @@ name = "t2t-client"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "t2t"
+path = "src/bin/t2t/main.rs"
+
+[[bin]]
+name = "t2t-tui"
+path = "src/bin/t2t-tui/main.rs"
+
 [dependencies]
 fern = "0.6.2"
 log = "0.4.22"
@@ -24,4 +32,3 @@ color-eyre = "0.6.3"
 
 [build-dependencies]
 tonic-build = "0.12"
-

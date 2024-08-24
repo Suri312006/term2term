@@ -7,7 +7,8 @@ pub struct Config {
 
 impl Config {
     pub fn new() -> Self {
-        dotenvy::dotenv().expect(".env file not found");
+        // ignoring error here
+        let _ = dotenvy::dotenv();
         Config {
             db_url: env::var("DB_URL").unwrap(),
         }

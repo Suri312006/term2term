@@ -1,0 +1,25 @@
+# fly.toml app configuration file generated for t2t-server on 2024-08-24T12:21:18-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 't2t-server'
+primary_region = 'sjc'
+
+[build]
+
+[[services]]
+internal_port = 50051
+protocol = "tcp"
+
+[[services.ports]]
+handlers = ["tls"]
+port = "443"
+
+[services.ports.tls_options]
+alpn = ["h2"]
+
+[[vm]]
+memory = '1gb'
+cpu_kind = 'shared'
+cpus = 1

@@ -13,8 +13,6 @@ async fn main() -> Result<()> {
     color_eyre::install()?;
 
     let conf = Config::new();
-    println!("{conf:#?}");
-
     let db = Database::connect(conf.db_url).await?;
 
     Server::builder()
