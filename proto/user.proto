@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package t2t;
+
+message User {
+    string id = 1;
+    string name = 2;
+}
+
+message UserList {
+    repeated User users = 1;
+}
+
+service UserService {
+    rpc Create(NewUserReq) returns (User);
+    rpc Verify(User) returns (VerifyUserRes);
+    rpc Search(SearchUserReq) returns (UserList);
+    rpc ChangeUsername(ChangeNameReq) returns (User);
+}
+
+message SearchUserReq {
+    UserSearchTypes kind = 1;
+    optional User query = 2;
+}
+
+enum UserSearchTypes {
+    All = 0;
+    UserId = 1;
+    Name = 2;
+}
+
+message VerifyUserRes {
+    bool verified = 1;
+}
+
+message VerifyUserReq {
+    string id = 1;
+    string name = 2;
+}
+
+message NewUserReq {
+    string username = 1;
+}
+
+message ChangeNameReq {
+    string newname = 1;
+}

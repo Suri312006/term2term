@@ -3,8 +3,9 @@ use t2t_server::Config;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let conf = Config::new();
+    color_eyre::install()?;
 
+    let conf = Config::new();
     println!("{conf:#?}");
 
     Ok(())

@@ -1,15 +1,15 @@
 fn main() {
-    // tonic_build::configure()
-    //     .build_client(true)
-    //     .protoc_arg("--experimental_allow_proto3_optional")
-    //     .compile(
-    //         &[
-    //             "../proto/peer.proto",
-    //             "../proto/local.proto",
-    //             "../proto/matchmaker.proto",
-    //         ],
-    //         // this is where our proto files are
-    //         &["../proto"],
-    //     )
-    //     .unwrap_or_else(|e| panic!("unable to compile proto's due to {e:?}"))
+    tonic_build::configure()
+        .build_client(true)
+        .protoc_arg("--experimental_allow_proto3_optional")
+        .compile(
+            &[
+                "../proto/user.proto",
+                "../proto/message.proto",
+                "../proto/conversation.proto",
+            ],
+            // this is where our proto files are
+            &["../proto"],
+        )
+        .unwrap_or_else(|e| panic!("unable to compile proto's due to {e:?}"))
 }
