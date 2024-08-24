@@ -1,8 +1,8 @@
-use std::{env, path::Path};
+use std::env;
 
 #[derive(Debug)]
 pub struct Config {
-    db_url: String,
+    pub db_url: String,
 }
 
 impl Config {

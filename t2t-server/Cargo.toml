@@ -29,6 +29,7 @@ sea-orm = { version = "1.0.0-rc.5", features = [
     "debug-print",
 ] }
 dotenvy = "0.15.7"
+nanoid = "0.4.0"
 
 [build-dependencies]
 tonic-build = "0.12"

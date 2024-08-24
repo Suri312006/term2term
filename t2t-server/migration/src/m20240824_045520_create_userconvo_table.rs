@@ -36,7 +36,7 @@ impl MigrationTrait for Migration {
                             .from(UserConvo::Table, UserConvo::ConvoId)
                             .to(Conversation::Table, Conversation::Id),
                     )
-                    .to_owned(),
+                    .to_owned(), 
             )
             .await
     }

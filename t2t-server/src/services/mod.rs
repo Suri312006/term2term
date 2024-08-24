@@ -6,7 +6,7 @@ mod grpc {
     tonic::include_proto!("t2t");
 }
 
-use grpc::*;
+pub use grpc::*;
 
 pub use conversation::*;
 pub use message::*;

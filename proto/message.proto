@@ -12,8 +12,8 @@ import "conversation.proto";
 message Msg {
     string id = 1;
     Convo convo = 2;
-    User author = 3;
-    User recipient = 4;
+    UserInfo author = 3;
+    UserInfo recipient = 4;
     string body = 5;
     uint64 unix_time = 6;
     bool isRead = 7;
@@ -30,7 +30,7 @@ service MsgService {
 
 message MsgSendReq {
     Convo convo = 1;
-    User author = 2;
+    UserInfo author = 2;
     string body = 3;
     uint64 unix_time = 4;
 }
