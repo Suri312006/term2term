@@ -11,27 +11,30 @@ pub struct Migration;
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        // Replace the sample below with your own migration scripts
+
         manager
             .create_table(
                 Table::create()
-                    .table(Message::Table)
+                    .table(UserConvo::Table)
                     .if_not_exists()
-                    .col(pk_auto(Message::Id))
-                    .col(string(Message::PubId))
-                    .col(string(Message::Body))
-                    .col(integer(Message::AuthorId))
-                    .col(integer(Message::ConversationId))
-                    .foreign_key(
-                        ForeignKey::create()
-                            .name("fk-msg-convo_id")
-                            .from(Message::Table, Message::ConversationId)
-                            .to(Conversation::Table, Conversation::Id),
+                    .primary_key(
+                        Index::create()
+                            .table(UserConvo::Table)
+                            .col(UserConvo::UserId)
+                            .col(UserConvo::ConvoId),
                     )
+                    .col(integer(UserConvo::UserId))
                     .foreign_key(
                         ForeignKey::create()
-                            .name("fk-msg-user_id")
-                            .from(Message::Table, Message::AuthorId)
+                            .from(UserConvo::Table, UserConvo::UserId)
                             .to(User::Table, User::Id),
+                    )
+                    .col(integer(UserConvo::ConvoId))
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(UserConvo::Table, UserConvo::ConvoId)
+                            .to(Conversation::Table, Conversation::Id),
                     )
                     .to_owned(),
             )
@@ -40,17 +43,15 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(Message::Table).to_owned())
+            .drop_table(Table::drop().table(UserConvo::Table).to_owned())
             .await
     }
 }
 
 #[derive(DeriveIden)]
-enum Message {
+enum UserConvo {
     Table,
     Id,
-    PubId,
-    AuthorId,
-    ConversationId,
-    Body,
+    UserId,
+    ConvoId,
 }

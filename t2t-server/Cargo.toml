@@ -33,5 +33,3 @@ dotenvy = "0.15.7"
 [build-dependencies]
 tonic-build = "0.12"
 
-[workspace]
-members = [".", "migration"]
