@@ -14,7 +14,6 @@ impl MigrationTrait for Migration {
                     .col(pk_auto(User::Id))
                     .col(string(User::Name))
                     .col(string(User::PubId))
-                    .col(time(User::CreatedAt))
                     .to_owned(),
             )
             .await

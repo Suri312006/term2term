@@ -30,4 +30,5 @@ pub enum Conversation {
     Table,
     Id,
     PubId,
+    CreatedAt
 }

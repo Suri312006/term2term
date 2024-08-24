@@ -2,7 +2,7 @@ use sea_orm_migration::{prelude::*, schema::*};
 
 use crate::{
     m20240824_010034_create_user_table::User,
-    m20240824_010049_create_conversation_table::Conversation,
+    m20240824_010041_create_conversation_table::Conversation,
 };
 
 #[derive(DeriveMigrationName)]
@@ -46,11 +46,12 @@ impl MigrationTrait for Migration {
 }
 
 #[derive(DeriveIden)]
-enum Message {
+pub enum Message {
     Table,
     Id,
     PubId,
     AuthorId,
     ConversationId,
+    CreatedAt,
     Body,
 }
