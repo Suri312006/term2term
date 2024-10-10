@@ -3,7 +3,7 @@ alias rc:=run_client
 alias rs:=run_server
 
 run_client:
-    cd ./t2t-client/ && cargo run
+    cargo run --bin t2t
 
 run_server:
     cd ./t2t-server/ && cargo run 

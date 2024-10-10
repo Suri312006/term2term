@@ -1,3 +1,15 @@
-fn main() {
+use clap::Parser;
+use cli::Cli;
+use color_eyre::eyre::Result;
+
+mod cli;
+fn main() -> Result<()> {
+    color_eyre::install()?;
+    let opts = Cli::parse();
+    match opts {
+        _ => {}
+    }
+
     println!("Hello World");
+    Ok(())
 }
