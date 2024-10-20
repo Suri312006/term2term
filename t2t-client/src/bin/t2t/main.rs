@@ -6,9 +6,11 @@ mod cli;
 fn main() -> Result<()> {
     color_eyre::install()?;
     let opts = Cli::parse();
-    match opts {
-        _ => {}
+    match opts.command {
+
     }
+
+
 
     println!("Hello World");
     Ok(())
