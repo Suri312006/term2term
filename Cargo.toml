@@ -1,3 +1,0 @@
-[workspace]
-resolver = "2"
-members = ["t2t-client", "t2t-server", "t2t-server/migration"]
