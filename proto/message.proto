@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+option go_package = "github.com/suri312006/term2term/v2";
+
+package t2t;
+
+
+// import "google/protobuf/timestamp.proto"; //too cringe wouldnt work
+import "user.proto";
+import "conversation.proto";
+
+message Msg {
+    string id = 1;
+    Convo convo = 2;
+    UserInfo author = 3;
+    UserInfo recipient = 4;
+    string body = 5;
+    uint64 unix_time = 6;
+    bool isRead = 7;
+}
+
+message MsgList {
+    repeated Msg messages = 1;
+}
+
+service MsgService {
+    rpc Send(MsgSendReq) returns (Msg);
+    rpc Search(MsgSearchReq) returns(MsgList);
+}
+
+message MsgSendReq {
+    Convo convo = 1;
+    UserInfo author = 2;
+    string body = 3;
+    uint64 unix_time = 4;
+}
+
+
+message MsgSearchReq {
+    MsgSearchKindBy kind = 1;
+    string id = 2;
+    bool unread = 3;
+    string convoId = 4;
+    string userId = 5;
+}
+
+enum MsgSearchKindBy {
+    Id = 0;
+    Unread = 1;
+    ConvoId = 2;
+    AuthorId = 3;
+}
+
+
