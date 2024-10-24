@@ -1,4 +1,4 @@
-use nanoid::{alphabet, nanoid};
+use nanoid::nanoid;
 
 pub struct Id {}
 

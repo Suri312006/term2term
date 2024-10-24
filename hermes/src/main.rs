@@ -1,11 +1,11 @@
 use std::{net::SocketAddr, str::FromStr};
 
 use color_eyre::eyre::Result;
-use sea_orm::Database;
-use t2t_server::{
+use hermes::{
     services::{user_service_server::UserServiceServer, UserServer},
     Config,
 };
+use sea_orm::Database;
 use tonic::transport::Server;
 
 #[tokio::main]

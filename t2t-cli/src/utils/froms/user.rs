@@ -1,15 +1,16 @@
-use crate::{files::config::ConfigUser, grpc::User};
-impl From<User> for ConfigUser {
-    fn from(value: User) -> Self {
+use crate::{files::config::ConfigUser, grpc::UserInfo};
+
+impl From<UserInfo> for ConfigUser {
+    fn from(value: UserInfo) -> Self {
         ConfigUser {
             username: value.name,
             id: value.id,
         }
     }
 }
-impl From<ConfigUser> for User {
+impl From<ConfigUser> for UserInfo {
     fn from(value: ConfigUser) -> Self {
-        User {
+        UserInfo {
             name: value.username,
             id: value.id,
         }

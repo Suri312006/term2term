@@ -8,6 +8,5 @@ mod grpc {
 
 pub use grpc::*;
 
-pub use conversation::*;
 pub use message::*;
 pub use user::*;

@@ -1,4 +1,4 @@
-use sea_orm::{ActiveModelTrait, EntityTrait, TryIntoModel};
+use sea_orm::{ActiveModelTrait, TryIntoModel};
 use sea_orm::{ActiveValue, DatabaseConnection};
 use tonic::{Request, Response, Status};
 
