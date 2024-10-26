@@ -3,32 +3,51 @@ syntax = "proto3";
 option go_package = "github.com/suri312006/term2term/v2";
 
 import "user.proto";
+import "google/protobuf/wrappers.proto";
 
 package t2t;
 
-message Participants {
-    repeated UserInfo users = 1;
-}
+message Participants { repeated User users = 1; }
 
 message Convo {
-    string id = 1;
-    Participants participants = 2;
-    uint64 createdAt = 3;
+  string id = 1;
+  Participants participants = 2;
+  uint64 createdAt = 3;
 }
 
-message ConvoList {
-    repeated Convo convos = 1;
-}
+message ConvoList { repeated Convo convos = 1; }
 
 service ConvoService {
-    rpc Create(NewConvoReq) returns (Convo);
-   rpc List(ListConvoReq) returns (ConvoList);
+
+  rpc Create(NewConvoReq) returns (NewConvoRes);
+  rpc Search(SearchConvoReq) returns (SearchConvoRes);
+  // update makes no sense here
+  rpc Delete(DeleteConvoReq) returns (DeleteConvoRes);
 }
 
-message NewConvoReq {
-    Participants participants = 1;
+message NewConvoReq { Participants participants = 1; }
+enum CreateConvoEnum {
+  Success = 0;
+  AlreadyExists = 1;
+};
+
+message NewConvoRes {
+  CreateConvoEnum status = 1;
+  Convo created = 2;
 }
 
-message ListConvoReq {
-    UserInfo user = 1;
+enum SearchConvoType {
+  ById = 0;
+  ByUser = 1;
 }
+
+message SearchConvoReq {
+  SearchConvoType type = 1;
+  string id = 2;
+  User user = 3;
+}
+
+message SearchConvoRes { ConvoList results = 1; }
+
+message DeleteConvoReq { Convo toDelete = 1; }
+message DeleteConvoRes { google.protobuf.BoolValue success = 1; }

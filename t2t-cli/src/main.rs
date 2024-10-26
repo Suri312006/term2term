@@ -1,6 +1,6 @@
 use clap::Parser;
 use color_eyre::Result;
-use t2t::{AppState, Cli};
+use t2t_cli::{AppState, Cli};
 
 #[tokio::main]
 async fn main() -> Result<()> {

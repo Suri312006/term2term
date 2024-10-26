@@ -18,7 +18,7 @@ use crate::{
     },
     grpc::{
         self, Convo, ConvoList, ListConvoReq, Msg, MsgSearchKindBy, MsgSearchReq, MsgSendReq,
-        NewConvoReq, NewUserReq, Participants, SearchUserReq, User,
+        NewConvoReq, NewUserReq, Participants, SearchUserReq, UserInfo,
     },
     AppState, Handlers,
 };
@@ -80,11 +80,11 @@ async fn handle_init(app: &mut AppState) -> Result<()> {
                 let res = app
                     .handlers
                     .user
-                    .verify(<ConfigUser as Into<User>>::into(user.clone()).into_request())
+                    .verify(<ConfigUser as Into<UserInfo>>::into(user.clone()).into_request())
                     .await?
                     .into_inner();
 
-                if !res.verified {
+                if !res {
                     println!(
                         "{}",
                         format!("WARNING: User not verified {:?}, could be malformed?", user).red()
@@ -107,7 +107,7 @@ async fn handle_init(app: &mut AppState) -> Result<()> {
                 .user
                 .create(
                     NewUserReq {
-                        username: username.trim().to_string(),
+                        name: username.trim().to_string(),
                     }
                     .into_request(),
                 )
@@ -140,7 +140,7 @@ async fn handle_user(user_args: UserArgs, app: &mut AppState) -> Result<()> {
                 let new_user = app
                     .handlers
                     .user
-                    .create(Request::new(NewUserReq { username }))
+                    .create(Request::new(NewUserReq { name: username }))
                     .await?
                     .into_inner();
 
@@ -207,52 +207,53 @@ async fn handle_convo(convo_args: ConversationArgs, app: &mut AppState) -> Resul
             Ok(())
         }
         ConversationVariants::Start => {
-            let all_users = app
-                .handlers
-                .user
-                .search(
-                    SearchUserReq {
-                        kind: 0,
-                        query: None,
-                    }
-                    .into_request(),
-                )
-                .await?
-                .into_inner();
-            println!("Type the number of the user you would like to start a conversation with");
-
-            for (i, user) in all_users.users.clone().into_iter().enumerate() {
-                println!("{}: {}", i, user.name);
-            }
-
-            let mut buf = String::new();
-            let _ = stdout().flush();
-            stdin().read_line(&mut buf);
-
-            let index: usize = buf.trim().parse()?;
-
-            let new_convo = app
-                .handlers
-                .convo
-                .create(NewConvoReq {
-                    participants: Some(Participants {
-                        users: vec![
-                            app.cache.curr_user()?.into(),
-                            all_users
-                                .users
-                                .get(index)
-                                .ok_or(eyre!("yoooo what the sigma"))
-                                .cloned()?,
-                        ],
-                    }),
-                })
-                .await?
-                .into_inner();
-
-            app.cache.convo = Some(new_convo.try_into().map_err(|err: &str| eyre!(err))?);
-            app.cache.write(&app.paths);
-
-            Ok(())
+            todo!("need to rework this")
+            //let all_users = app
+            //    .handlers
+            //    .user
+            //    .search(
+            //        SearchUserReq {
+            //            kind: 0,
+            //            query: None,
+            //        }
+            //        .into_request(),
+            //    )
+            //    .await?
+            //    .into_inner();
+            //println!("Type the number of the user you would like to start a conversation with");
+            //
+            //for (i, user) in all_users.users.clone().into_iter().enumerate() {
+            //    println!("{}: {}", i, user.name);
+            //}
+            //
+            //let mut buf = String::new();
+            //let _ = stdout().flush();
+            //stdin().read_line(&mut buf);
+            //
+            //let index: usize = buf.trim().parse()?;
+            //
+            //let new_convo = app
+            //    .handlers
+            //    .convo
+            //    .create(NewConvoReq {
+            //        participants: Some(Participants {
+            //            users: vec![
+            //                app.cache.curr_user()?.into(),
+            //                all_users
+            //                    .users
+            //                    .get(index)
+            //                    .ok_or(eyre!("yoooo what the sigma"))
+            //                    .cloned()?,
+            //            ],
+            //        }),
+            //    })
+            //    .await?
+            //    .into_inner();
+            //
+            //app.cache.convo = Some(new_convo.try_into().map_err(|err: &str| eyre!(err))?);
+            //app.cache.write(&app.paths);
+            //
+            //Ok(())
         }
         ConversationVariants::Select => {
             let convos = app

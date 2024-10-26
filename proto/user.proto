@@ -2,16 +2,65 @@ syntax = "proto3";
 
 package t2t;
 
-message UserInfo {
-    string id = 1;
-    string name = 2;
+import "google/protobuf/wrappers.proto";
+
+message User {
+  string id = 1;
+  string name = 2;
+  string suffix = 3;
+}
+
+message UserList { repeated User inner = 1; }
+
+enum UserModificationCodes {
+  Open = 0;
+  Taken = 1;
 }
 
 service UserService {
-    rpc Create(NewUserReq) returns (UserInfo);
+  // basic crud over here
+  rpc Create(CreateUserReq) returns (CreateUserRes);
+  rpc Search(SearchUserReq) returns (SearchUserRes);
+  rpc Update(UpdateUserReq) returns (UpdateUserRes);
+  rpc Delete(DeleteUserReq) returns (DeleteUserRes);
+
+  // unique stuff
+  rpc Verify(VerifyUserReq) returns (google.protobuf.BoolValue);
 }
 
-message NewUserReq {
-    string name = 2;
+message CreateUserReq {
+  string name = 1;
+  string suffix = 2;
 }
 
+message CreateUserRes {
+  UserModificationCodes status = 1;
+  repeated string openSuffix = 2;
+}
+
+enum SearchUserReqEnum {
+  name = 0;
+  name_and_suffix = 2;
+}
+
+// NOTE: maybe we could support like a live search idk
+message SearchUserReq {
+  SearchUserReqEnum type = 1;
+  string name = 2;
+  string suffix = 3;
+}
+
+message SearchUserRes { repeated User results = 1; }
+
+// TODO: we need some way to guard these with authentication (maybe look into
+// tonic middleware)
+message UpdateUserReq { User newInfo = 1; }
+
+message UpdateUserRes { UserModificationCodes status = 1; }
+
+message DeleteUserReq { User user = 1; }
+
+// able to add more to this later if needed
+message DeleteUserRes { google.protobuf.BoolValue success = 1; }
+
+message VerifyUserReq { User user = 1; }
