@@ -1,16 +1,18 @@
+use log::error;
+use sqlx::{Pool, Postgres};
 use tonic::{Request, Response, Status};
 
-use crate::utils::Id;
-
-use super::{user_service_server::UserService, CreateUserReq, User, VerifyUserReq};
-use super::{
-    CreateUserRes, DeleteUserReq, DeleteUserRes, SearchUserReq, SearchUserRes, UpdateUserReq,
-    UpdateUserRes,
+use crate::{
+    grpc::{
+        user_service_server::UserService, CreateUserReq, CreateUserRes, DeleteUserReq,
+        DeleteUserRes, SearchUserReq, SearchUserRes, UpdateUserReq, UpdateUserRes, VerifyUserReq,
+    },
+    utils::Id,
 };
 
-#[derive(Default)]
+//#[derive(Default)]
 pub struct UserServer {
-    //pub db: DatabaseConnection,
+    pub db: Pool<Postgres>,
 }
 
 #[tonic::async_trait]
@@ -19,23 +21,33 @@ impl UserService for UserServer {
         &self,
         request: Request<CreateUserReq>,
     ) -> Result<Response<CreateUserRes>, Status> {
+        let request = request.into_inner();
+        let x = sqlx::query!(
+            r#"
+        INSERT INTO Users (UserPubId, Name, Suffix)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+        "#,
+            Id::gen(),
+            request.name,
+            request.suffix
+        )
+        .fetch_all(&self.db)
+        .await
+        .map_err(|err| {
+            error!("{err}");
+            Status::internal("xd")
+        })?;
+
+        for i in x {
+            println!("{}", i.userpubid)
+        }
+
         todo!()
-        //let x = user::ActiveModel {
-        //    name: ActiveValue::Set(request.into_inner().name),
-        //    pub_id: ActiveValue::Set(Id::gen()),
-        //    ..Default::default()
-        //}
-        //.save(&self.db)
-        //.await
-        //.unwrap()
-        //.try_into_model()
-        //.unwrap();
-        //
-        //println!("{:#?}", x);
-        //
-        //Ok(Response::new(User {
-        //    name: x.name,
-        //    id: x.pub_id,
+
+        //Ok(Response::new(CreateUserRes {
+        //    created_user: x,
+        //    status: 0,
         //}))
     }
 

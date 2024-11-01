@@ -10,7 +10,7 @@ impl Config {
         // ignoring error here
         let _ = dotenvy::dotenv();
         Config {
-            db_url: env::var("DB_URL").unwrap(),
+            db_url: env::var("DATABASE_URL").unwrap(),
         }
     }
 }

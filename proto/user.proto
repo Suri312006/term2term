@@ -35,7 +35,7 @@ message CreateUserReq {
 
 message CreateUserRes {
   UserModificationCodes status = 1;
-  repeated string openSuffix = 2;
+  User createdUser = 2;
 }
 
 enum SearchUserReqEnum {
