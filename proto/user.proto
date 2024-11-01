@@ -3,6 +3,7 @@ syntax = "proto3";
 package t2t;
 
 import "google/protobuf/wrappers.proto";
+import "shared.proto";
 
 message User {
   string id = 1;
@@ -11,11 +12,6 @@ message User {
 }
 
 message UserList { repeated User inner = 1; }
-
-enum UserModificationCodes {
-  Open = 0;
-  Taken = 1;
-}
 
 service UserService {
   // basic crud over here
@@ -34,8 +30,8 @@ message CreateUserReq {
 }
 
 message CreateUserRes {
-  UserModificationCodes status = 1;
-  User createdUser = 2;
+  Existence status = 1;
+  optional User createdUser = 2;
 }
 
 enum SearchUserReqEnum {
@@ -56,7 +52,10 @@ message SearchUserRes { repeated User results = 1; }
 // tonic middleware)
 message UpdateUserReq { User newInfo = 1; }
 
-message UpdateUserRes { UserModificationCodes status = 1; }
+message UpdateUserRes {
+  Existence status = 1;
+  User updatedUser = 2;
+}
 
 message DeleteUserReq { User user = 1; }
 

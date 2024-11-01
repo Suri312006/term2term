@@ -3,13 +3,14 @@ use sqlx::{Pool, Postgres};
 use tonic::{Request, Response, Status};
 
 use crate::{
+    entities::user::User,
     grpc::{
-        user_service_server::UserService, CreateUserReq, CreateUserRes, DeleteUserReq,
-        DeleteUserRes, SearchUserReq, SearchUserRes, UpdateUserReq, UpdateUserRes, VerifyUserReq,
+        self, user_service_server::UserService, CreateUserReq, CreateUserRes, DeleteUserReq,
+        DeleteUserRes, Existence, SearchUserReq, SearchUserReqEnum, SearchUserRes, UpdateUserReq,
+        UpdateUserRes, VerifyUserReq,
     },
     utils::Id,
 };
-
 //#[derive(Default)]
 pub struct UserServer {
     pub db: Pool<Postgres>,
@@ -22,46 +23,118 @@ impl UserService for UserServer {
         request: Request<CreateUserReq>,
     ) -> Result<Response<CreateUserRes>, Status> {
         let request = request.into_inner();
-        let x = sqlx::query!(
+
+        // first check to make sure user name was already not taken
+        if !sqlx::query!(
             r#"
-        INSERT INTO Users (UserPubId, Name, Suffix)
-        VALUES ($1, $2, $3)
-        RETURNING *;
-        "#,
-            Id::gen(),
+            SELECT * 
+            FROM Users 
+            WHERE Name = $1 
+            AND Suffix = $2"#,
             request.name,
-            request.suffix
+            request.suffix,
         )
         .fetch_all(&self.db)
         .await
         .map_err(|err| {
             error!("{err}");
             Status::internal("xd")
-        })?;
-
-        for i in x {
-            println!("{}", i.userpubid)
+        })?
+        .is_empty()
+        {
+            return Ok(Response::new(CreateUserRes {
+                status: Existence::AlreadyExists.into(),
+                created_user: None,
+            }));
         }
 
-        todo!()
+        // if not taken, then insert into it
+        let x = sqlx::query_as!(
+            User,
+            r#"
+        INSERT INTO Users (UserPubId, Name, Suffix)
+        VALUES ($1, $2, $3)
+        RETURNING UserPubId AS id, Name, Suffix;
+        "#,
+            Id::gen(),
+            request.name,
+            request.suffix
+        )
+        .fetch_one(&self.db)
+        .await
+        .map_err(|err| {
+            error!("{err}");
+            Status::internal("xd")
+        })?;
 
-        //Ok(Response::new(CreateUserRes {
-        //    created_user: x,
-        //    status: 0,
-        //}))
+        Ok(Response::new(CreateUserRes {
+            created_user: Some(x.into()),
+            status: Existence::Success.into(),
+        }))
     }
 
     async fn search(
         &self,
         request: Request<SearchUserReq>,
     ) -> Result<Response<SearchUserRes>, Status> {
-        todo!()
+        let request = request.into_inner();
+
+        let x = match request.r#type() {
+            SearchUserReqEnum::Name => sqlx::query_as!(
+                User,
+                r#"
+                SELECT UserPubId as id, Name, Suffix 
+                FROM Users
+                WHERE $1 = Name
+                "#,
+                request.name
+            )
+            .fetch_all(&self.db)
+            .await
+            .map_err(|err| {
+                error!("{:#?}", err);
+                Status::internal("db error")
+            })?,
+
+            SearchUserReqEnum::NameAndSuffix => sqlx::query_as!(
+                User,
+                r#"
+                SELECT UserPubId as id, Name, Suffix 
+                FROM Users
+                WHERE $1 = Name AND $2 = Suffix
+                "#,
+                request.name,
+                request.suffix
+            )
+            .fetch_all(&self.db)
+            .await
+            .map_err(|err| {
+                error!("{:#?}", err);
+                Status::internal("db error")
+            })?,
+        };
+
+        Ok(Response::new(SearchUserRes {
+            results: x.into_iter().map(Into::<grpc::User>::into).collect(),
+        }))
     }
 
     async fn update(
         &self,
         request: Request<UpdateUserReq>,
     ) -> Result<Response<UpdateUserRes>, Status> {
+        let request = request.into_inner();
+
+        //let x = sqlx::query_as!(
+        //    User,
+        //    r#"
+        //UPDATE Users
+        //SET Name = $4, Suffix = $5
+        //WHERE UserPubId = $1 AND Name = $2 AND Suffix = $3
+        //RETURNING UserPubId AS id, Name, Suffix;
+        //"#,
+        //
+        //);
         todo!()
     }
 

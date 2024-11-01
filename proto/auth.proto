@@ -1,0 +1,30 @@
+syntax = "proto3";
+package t2t;
+
+import "shared.proto";
+import "user.proto";
+
+message LoginReq {
+  string name = 1;
+  string password = 2;
+}
+
+message RegisterReq {
+  string name = 1;
+  string suffix = 2;
+  string email = 3;
+  string password = 4;
+}
+message RegisterRes {
+  Existence status = 1;
+  optional User createdUser = 2;
+  optional Token token = 3;
+}
+
+message Token { string access_token = 1; }
+
+service AuthService {
+  rpc Login(LoginReq) returns (Token);
+  rpc Register(RegisterReq) returns (RegisterRes);
+  rpc VerifyToken(Token) returns (User);
+}

@@ -3,6 +3,7 @@ syntax = "proto3";
 option go_package = "github.com/suri312006/term2term/v2";
 
 import "user.proto";
+import "shared.proto";
 import "google/protobuf/wrappers.proto";
 
 package t2t;
@@ -26,13 +27,9 @@ service ConvoService {
 }
 
 message NewConvoReq { Participants participants = 1; }
-enum CreateConvoEnum {
-  Success = 0;
-  AlreadyExists = 1;
-};
 
 message NewConvoRes {
-  CreateConvoEnum status = 1;
+  Existence status = 1;
   Convo created = 2;
 }
 

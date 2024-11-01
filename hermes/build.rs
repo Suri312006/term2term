@@ -4,6 +4,8 @@ fn main() {
         .protoc_arg("--experimental_allow_proto3_optional")
         .compile_protos(
             &[
+                "../proto/auth.proto",
+                "../proto/shared.proto",
                 "../proto/user.proto",
                 "../proto/message.proto",
                 "../proto/conversation.proto",

@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package t2t;
+
+enum Existence {
+  Success = 0;
+  AlreadyExists = 1;
+};
