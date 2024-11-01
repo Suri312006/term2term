@@ -8,7 +8,7 @@ use tonic::transport::Server;
 async fn main() -> Result<()> {
     color_eyre::install()?;
 
-    let conf = Config::new();
+    let conf = Config::default();
 
     let db = Db::connect(conf.db_url.as_str()).await?;
 
