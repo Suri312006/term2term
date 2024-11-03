@@ -1,6 +1,7 @@
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use jsonwebtoken::TokenData;
+use log::error;
 //TODO: https://github.com/Keats/jsonwebtoken
 //https://www.shuttle.dev/blog/2024/02/21/using-jwt-auth-rust
 //https://medium.com/@cuongta/how-to-encode-and-decode-jwt-using-rust-51f3b757e212
@@ -24,6 +25,12 @@ pub struct AuthInterceptor {
     auth: Auth,
 }
 
+impl AuthInterceptor {
+    pub fn new(auth: Auth) -> Self {
+        AuthInterceptor { auth }
+    }
+}
+
 #[async_trait]
 impl RequestInterceptor for AuthInterceptor {
     async fn intercept(&self, mut req: Request<BoxBody>) -> Result<Request<BoxBody>, Status> {
@@ -32,7 +39,7 @@ impl RequestInterceptor for AuthInterceptor {
                 let token_data = self
                     .auth
                     .validate_token(token)
-                    .map_err(|_err| Status::unauthenticated("Failed to Validate Token"))?
+                    .map_err(|_err| Status::unauthenticated("Failed to Validate Token"))?;
 
                 let user_id_header_val = HeaderValue::from_str(&token_data.claims.sub)
                     .map_err(|_e| Status::internal("Failed to convert user_id to header value"))?;
@@ -61,14 +68,17 @@ pub enum AuthError {
 #[derive(Serialize, Deserialize, Debug)]
 // these define my authentication scheme
 pub struct Claims {
-    iss: String, // issuer = hermes
-    sub: String, // subject = userid
-    iat: usize,  // issued at time
-    exp: usize,  // expiry time
+    pub iss: String, // issuer = hermes
+    pub sub: String, // subject = userid
+    pub iat: usize,  // issued at time
+    pub exp: usize,  // expiry time
 }
 
 impl Auth {
-    pub fn gen_token(&self, user_id: String) -> Result<String, AuthError> {
+    pub fn new(config: Config) -> Self {
+        Auth { config }
+    }
+    pub fn gen_token(&self, user_id: &str) -> Result<String, AuthError> {
         let delta = SystemTime::now()
             .checked_add(Duration::from_secs(60))
             .ok_or(AuthError::TokenCreation)?
@@ -83,7 +93,7 @@ impl Auth {
 
         let c = Claims {
             iss: "Hermes".to_string(),
-            sub: user_id,
+            sub: user_id.to_string(),
             iat: now as usize,
             exp: delta as usize,
         };
@@ -92,8 +102,10 @@ impl Auth {
 
         let secret = jsonwebtoken::EncodingKey::from_secret("keep yourself safe".as_bytes());
 
-        let res =
-            jsonwebtoken::encode(&header, &c, &secret).map_err(|_e| AuthError::TokenCreation)?;
+        let res = jsonwebtoken::encode(&header, &c, &secret).map_err(|err| {
+            error!("{err}");
+            AuthError::TokenCreation
+        })?;
 
         Ok(res)
     }
@@ -116,15 +128,17 @@ impl Auth {
 mod tests {
     use super::*;
 
+    //TODO: i need to somehow test network delay but i got no clue lol, seems like an integration
+    //test
     #[test]
     fn auth() {
         let auth = Auth {
             config: Config::default(),
         };
-        let x = auth.gen_token("lol".to_string()).unwrap();
+        let x = auth.gen_token("lol").unwrap();
 
         println!("{x}");
 
-        auth.validate_tken(&x).unwrap();
+        auth.validate_token(&x).unwrap();
     }
 }

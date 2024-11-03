@@ -1,6 +1,6 @@
 use crate::grpc;
 
-#[derive(sqlx::Type, Debug)]
+#[derive(sqlx::Type, Debug, Clone)]
 pub struct User {
     pub id: String,
     pub name: String,

@@ -25,6 +25,8 @@ dotenvy = "0.15.7"
 nanoid = "0.4.0"
 
 jsonwebtoken = "9.3.0"
+bcrypt = "0.15.0"
+email_address = "0.2.9"
 
 [build-dependencies]
 tonic-build = "0.12"
