@@ -1,59 +1,13 @@
+use log::error;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use jsonwebtoken::TokenData;
-use log::error;
-//TODO: https://github.com/Keats/jsonwebtoken
-//https://www.shuttle.dev/blog/2024/02/21/using-jwt-auth-rust
-//https://medium.com/@cuongta/how-to-encode-and-decode-jwt-using-rust-51f3b757e212
-use tonic::{
-    async_trait,
-    body::BoxBody,
-    codegen::http::{HeaderValue, Request, Response},
-    IntoRequest, Status,
-};
-use tonic_middleware::RequestInterceptor;
-
-use crate::{
-    grpc::{auth_service_server::AuthService, Token},
-    Config,
-};
-
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone)]
-pub struct AuthInterceptor {
-    auth: Auth,
-}
-
-impl AuthInterceptor {
-    pub fn new(auth: Auth) -> Self {
-        AuthInterceptor { auth }
-    }
-}
-
-#[async_trait]
-impl RequestInterceptor for AuthInterceptor {
-    async fn intercept(&self, mut req: Request<BoxBody>) -> Result<Request<BoxBody>, Status> {
-        match req.headers().get("authorization").map(|v| v.to_str()) {
-            Some(Ok(token)) => {
-                let token_data = self
-                    .auth
-                    .validate_token(token)
-                    .map_err(|_err| Status::unauthenticated("Failed to Validate Token"))?;
-
-                let user_id_header_val = HeaderValue::from_str(&token_data.claims.sub)
-                    .map_err(|_e| Status::internal("Failed to convert user_id to header value"))?;
-                req.headers_mut().insert("user_id", user_id_header_val);
-                Ok(req)
-            }
-
-            _ => Err(Status::unauthenticated("lock in")),
-        }
-    }
-}
+use crate::Config;
 
 #[derive(Clone)]
-pub struct Auth {
+pub struct Authenticator {
     config: Config,
 }
 
@@ -74,9 +28,9 @@ pub struct Claims {
     pub exp: usize,  // expiry time
 }
 
-impl Auth {
+impl Authenticator {
     pub fn new(config: Config) -> Self {
-        Auth { config }
+        Authenticator { config }
     }
     pub fn gen_token(&self, user_id: &str) -> Result<String, AuthError> {
         let delta = SystemTime::now()
@@ -100,7 +54,7 @@ impl Auth {
 
         let header = jsonwebtoken::Header::default();
 
-        let secret = jsonwebtoken::EncodingKey::from_secret("keep yourself safe".as_bytes());
+        let secret = jsonwebtoken::EncodingKey::from_secret(self.config.auth_secret.as_bytes());
 
         let res = jsonwebtoken::encode(&header, &c, &secret).map_err(|err| {
             error!("{err}");
@@ -113,7 +67,7 @@ impl Auth {
     pub fn validate_token(&self, token: &str) -> Result<TokenData<Claims>, AuthError> {
         let validation = jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::HS256);
 
-        let secret = jsonwebtoken::DecodingKey::from_secret("keep yourself safe".as_bytes());
+        let secret = jsonwebtoken::DecodingKey::from_secret(self.config.auth_secret.as_bytes());
 
         let res = jsonwebtoken::decode::<Claims>(token, &secret, &validation)
             .map_err(|_e| AuthError::InvalidToken)?;
@@ -132,7 +86,7 @@ mod tests {
     //test
     #[test]
     fn auth() {
-        let auth = Auth {
+        let auth = Authenticator {
             config: Config::default(),
         };
         let x = auth.gen_token("lol").unwrap();

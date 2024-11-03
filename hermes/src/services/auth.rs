@@ -2,26 +2,26 @@ use bcrypt::{hash, verify, DEFAULT_COST};
 use email_address::EmailAddress;
 use log::error;
 use sqlx::{Pool, Postgres};
-use tonic::{async_trait, Code, Request, Response, Status};
+use tonic::{async_trait, Request, Response, Status};
 
 use crate::{
     entities::user::User,
     grpc::{
-        self, auth_service_server::AuthService, CreateUserRes, Existence, LoginReq, LoginRes,
-        LoginResEnum, RegisterReq, RegisterRes, Token,
+        self, auth_service_server::AuthService, Existence, LoginReq, LoginRes, LoginResEnum,
+        RegisterReq, RegisterRes, Token,
     },
-    middleware::auth::Auth,
+    middleware::auth::Authenticator,
     utils::Id,
 };
 
 //https://dev.to/martinp/roll-your-own-auth-with-rust-and-protobuf-24ke
 pub struct AuthServer {
     db: Pool<Postgres>,
-    auth: Auth,
+    auth: Authenticator,
 }
 
 impl AuthServer {
-    pub fn new(db: Pool<Postgres>, auth: Auth) -> Self {
+    pub fn new(db: Pool<Postgres>, auth: Authenticator) -> Self {
         AuthServer { db, auth }
     }
 }
@@ -156,7 +156,7 @@ impl AuthService for AuthServer {
                 let user = sqlx::query_as!(
                     User,
                     r#"
-                SELECT UserPubId AS Id, Name, Suffix 
+                SELECT UserPubId AS Id, Name, Suffix
                 FROM Users
                 WHERE UserPubId=$1
                 "#,
