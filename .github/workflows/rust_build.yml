@@ -48,7 +48,7 @@ jobs:
         with:
           name: t2t
           path: |
-            rs/target/release/t2t
-            rs/target/release/t2t-cli
-            rs/target/x86_64-pc-windows-gnu/release/t2t.exe
-            rs/target/x86_64-pc-windows-gnu/release/t2t-cli.exe
+            t2t/target/release/t2t
+            t2t-cli/target/release/t2t-cli
+            t2t/target/x86_64-pc-windows-gnu/release/t2t.exe
+            t2t-cli/target/x86_64-pc-windows-gnu/release/t2t-cli.exe
