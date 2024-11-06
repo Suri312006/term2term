@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package t2t;
 
-import "google/protobuf/wrappers.proto";
 import "shared.proto";
 
 message User {
@@ -15,23 +14,9 @@ message UserList { repeated User inner = 1; }
 
 service UserService {
   // basic crud over here
-  rpc Create(CreateUserReq) returns (CreateUserRes);
   rpc Search(SearchUserReq) returns (SearchUserRes);
   rpc Update(UpdateUserReq) returns (UpdateUserRes);
   rpc Delete(DeleteUserReq) returns (DeleteUserRes);
-
-  // unique stuff
-  rpc Verify(VerifyUserReq) returns (google.protobuf.BoolValue);
-}
-
-message CreateUserReq {
-  string name = 1;
-  string suffix = 2;
-}
-
-message CreateUserRes {
-  Existence status = 1;
-  optional User createdUser = 2;
 }
 
 enum SearchUserReqEnum {
@@ -50,16 +35,17 @@ message SearchUserRes { repeated User results = 1; }
 
 // TODO: we need some way to guard these with authentication (maybe look into
 // tonic middleware)
-message UpdateUserReq { User newInfo = 1; }
+message UpdateUserReq {
+  string newName = 1;
+  string newSuffix = 2;
+}
 
 message UpdateUserRes {
   Existence status = 1;
-  User updatedUser = 2;
+  optional User updatedUser = 2;
 }
 
 message DeleteUserReq { User user = 1; }
 
 // able to add more to this later if needed
-message DeleteUserRes { google.protobuf.BoolValue success = 1; }
-
-message VerifyUserReq { User user = 1; }
+message DeleteUserRes { bool success = 1; }

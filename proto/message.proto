@@ -7,7 +7,6 @@ package t2t;
 // import "google/protobuf/timestamp.proto"; //too cringe wouldnt work
 import "user.proto";
 import "conversation.proto";
-import "google/protobuf/wrappers.proto";
 
 message Msg {
   string id = 1;
@@ -26,6 +25,13 @@ service MsgService {
   rpc Search(SearchMsgReq) returns (SearchMsgRes);
   // TODO: think about maybe a update / edit message
   rpc Delete(DeleteMsgReq) returns (DeleteMsgRes);
+
+  rpc RecieveIncoming(RecieveRequest) returns (stream Msg);
+}
+
+message RecieveRequest {
+  // NOTE: i dont know what to put inside here
+  string author = 1;
 }
 
 message SendMsgReq {
@@ -55,4 +61,4 @@ message SearchMsgReq {
 message SearchMsgRes { MsgList results = 1; }
 
 message DeleteMsgReq { Msg toDelete = 1; }
-message DeleteMsgRes { google.protobuf.BoolValue success = 1; }
+message DeleteMsgRes { bool success = 1; }

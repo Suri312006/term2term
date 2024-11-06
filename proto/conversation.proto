@@ -4,7 +4,6 @@ option go_package = "github.com/suri312006/term2term/v2";
 
 import "user.proto";
 import "shared.proto";
-import "google/protobuf/wrappers.proto";
 
 package t2t;
 
@@ -13,22 +12,21 @@ message Participants { repeated User users = 1; }
 message Convo {
   string id = 1;
   Participants participants = 2;
-  uint64 createdAt = 3;
 }
 
 message ConvoList { repeated Convo convos = 1; }
 
 service ConvoService {
 
-  rpc Create(NewConvoReq) returns (NewConvoRes);
+  rpc Create(CreateConvoReq) returns (CreateConvoRes);
   rpc Search(SearchConvoReq) returns (SearchConvoRes);
   // update makes no sense here
   rpc Delete(DeleteConvoReq) returns (DeleteConvoRes);
 }
 
-message NewConvoReq { Participants participants = 1; }
+message CreateConvoReq { Participants participants = 1; }
 
-message NewConvoRes {
+message CreateConvoRes {
   Existence status = 1;
   Convo created = 2;
 }
@@ -47,4 +45,4 @@ message SearchConvoReq {
 message SearchConvoRes { ConvoList results = 1; }
 
 message DeleteConvoReq { Convo toDelete = 1; }
-message DeleteConvoRes { google.protobuf.BoolValue success = 1; }
+message DeleteConvoRes { bool success = 1; }

@@ -21,7 +21,7 @@ impl AuthInterceptor {
 #[async_trait]
 impl RequestInterceptor for AuthInterceptor {
     async fn intercept(&self, mut req: Request<BoxBody>) -> Result<Request<BoxBody>, Status> {
-        match req.headers().get("authorization").map(|v| v.to_str()) {
+        match req.headers().get("Bearer").map(|v| v.to_str()) {
             Some(Ok(token)) => {
                 let token_data = self
                     .auth
