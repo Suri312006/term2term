@@ -7,11 +7,9 @@ import "shared.proto";
 
 package t2t;
 
-message Participants { repeated User users = 1; }
-
 message Convo {
   string id = 1;
-  Participants participants = 2;
+  UserList participants = 2;
 }
 
 message ConvoList { repeated Convo convos = 1; }
@@ -24,9 +22,10 @@ service ConvoService {
   rpc Delete(DeleteConvoReq) returns (DeleteConvoRes);
 }
 
-message CreateConvoReq { Participants participants = 1; }
+message CreateConvoReq { UserList participants = 1; }
 
 message CreateConvoRes {
+  // NOTE: should we ban duplicate conversations? how should we deal with that?
   Existence status = 1;
   Convo created = 2;
 }

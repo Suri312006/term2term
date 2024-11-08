@@ -32,7 +32,7 @@ message RegisterRes {
   optional Token token = 3;
 }
 
-message Token { string access_token = 1; }
+message Token { string inner = 1; }
 
 service AuthService {
   rpc Login(LoginReq) returns (LoginRes);

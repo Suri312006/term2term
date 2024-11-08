@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use bcrypt::{hash, verify, DEFAULT_COST};
 use email_address::EmailAddress;
 use log::error;
@@ -5,7 +7,7 @@ use sqlx::{Pool, Postgres};
 use tonic::{async_trait, Request, Response, Status};
 
 use crate::{
-    entities::user::User,
+    entities::User,
     grpc::{
         self, auth_service_server::AuthService, Existence, LoginReq, LoginRes, LoginResEnum,
         RegisterReq, RegisterRes, Token,
@@ -28,7 +30,7 @@ impl AuthServer {
 
 #[async_trait]
 impl AuthService for AuthServer {
-    async fn login(&self, req: Request<LoginReq>) -> Result<Response<LoginRes>, Status> {
+    async fn login(self: Arc<Self>, req: Request<LoginReq>) -> Result<Response<LoginRes>, Status> {
         let req = req.into_inner();
 
         if EmailAddress::is_valid(&req.email) {
@@ -77,13 +79,14 @@ impl AuthService for AuthServer {
             .map_err(|_| Status::internal("Failed to login"))?;
 
         Ok(Response::new(LoginRes {
-            token: Some(Token {
-                access_token: token,
-            }),
+            token: Some(Token { inner: token }),
             status: LoginResEnum::LoginSuccess.into(),
         }))
     }
-    async fn register(&self, req: Request<RegisterReq>) -> Result<Response<RegisterRes>, Status> {
+    async fn register(
+        self: Arc<Self>,
+        req: Request<RegisterReq>,
+    ) -> Result<Response<RegisterRes>, Status> {
         let req = req.into_inner();
 
         if !sqlx::query!(
@@ -120,14 +123,15 @@ impl AuthService for AuthServer {
         let new_user = sqlx::query_as!(
             User,
             r#"
-        INSERT INTO Users (UserPubId, Name, Suffix, HashedPass)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO Users (UserPubId, Name, Suffix, HashedPass, email)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING UserPubId AS id, Name, Suffix;
         "#,
             Id::gen(),
             req.name,
             req.suffix,
-            hashed_pass
+            hashed_pass,
+            req.email
         )
         .fetch_one(&self.db)
         .await
@@ -143,15 +147,16 @@ impl AuthService for AuthServer {
 
         Ok(Response::new(RegisterRes {
             created_user: Some(new_user.into()),
-            token: Some(Token {
-                access_token: token,
-            }),
+            token: Some(Token { inner: token }),
             status: Existence::Success.into(),
         }))
     }
 
-    async fn verify_token(&self, req: Request<Token>) -> Result<Response<grpc::User>, Status> {
-        match self.auth.validate_token(&req.into_inner().access_token) {
+    async fn verify_token(
+        self: Arc<Self>,
+        req: Request<Token>,
+    ) -> Result<Response<grpc::User>, Status> {
+        match self.auth.validate_token(&req.into_inner().inner) {
             Ok(data) => {
                 let user = sqlx::query_as!(
                     User,

@@ -1,85 +1,158 @@
-use std::{net::SocketAddr, str::FromStr, time::Duration};
+use std::time::Duration;
 
+use color_eyre::eyre::Result;
 use hermes::{
-    db::Db,
     grpc::{
-        msg_service_client::MsgServiceClient, msg_service_server::MsgServiceServer, RecieveRequest,
-        SendMsgReq, SendMsgRes,
+        self, auth_service_client::AuthServiceClient, convo_service_client::ConvoServiceClient,
+        msg_service_client::MsgServiceClient, CreateConvoReq, RecieveRequest, RegisterReq,
+        SendMsgReq, UserList,
     },
-    services::MessageServer,
-    Config,
+    Config, Hermes,
 };
+use log::{info, Log};
+use testcontainers_modules::{postgres::Postgres, testcontainers::runners::AsyncRunner};
 use tokio::time::timeout;
 use tokio_stream::StreamExt;
-use tonic::transport::Server;
+use tonic::{IntoRequest, Request};
+
+mod common;
 
 #[tokio::test()]
-pub async fn test_message_stream() {
-    let conf = Config::default();
+pub async fn test_message_stream_with_test_db() -> Result<()> {
+    let (db, connection_string) = common::TestDb::connect().await?;
 
-    let db = Db::connect(conf.db_url.as_str()).await.unwrap();
+    let conf = Config {
+        db_url: connection_string,
+        auth_secret: "lmfao-rand-auth-thing".to_string(),
+    };
 
-    let soc = SocketAddr::from_str("[::1]:50051").expect("weird socket addr");
+    let test_duration = Duration::from_secs(5);
 
-    let test_duration = Duration::from_secs(2);
+    let message_count = 1_000;
 
     let server = tokio::spawn(async move {
         // we dont care about this time out
-        let _ = timeout(
-            test_duration,
-            Server::builder()
-                .add_service(MsgServiceServer::new(MessageServer::new(db)))
-                .serve(soc),
-        )
-        .await;
+        let hermes = Hermes::new(conf).await.unwrap();
+        // strip timeout error and only return inner result
+        timeout(test_duration, hermes.run())
+            .await
+            .unwrap_or_else(|_x| Ok(())) // this line gets rid of the timeout
+            // error
+            .unwrap();
     });
 
-    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+    tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
 
-    let client = tokio::spawn(async move {
-        let soc = "http://[::]:50051";
+    let soc = "http://[::1]:50051";
+
+    let mut auth_client = AuthServiceClient::connect(soc).await.unwrap();
+
+    let recv_res = auth_client
+        .register(RegisterReq {
+            name: "test".to_string(),
+            suffix: "1".to_string(),
+            email: "test@hermes.com".to_string(),
+            password: "test".to_string(),
+        })
+        .await
+        .unwrap()
+        .into_inner();
+
+    let (recv_user, recv_token) = (
+        recv_res.created_user.unwrap(),
+        recv_res.token.unwrap().inner,
+    );
+
+    let send_res = auth_client
+        .register(RegisterReq {
+            name: "test".to_string(),
+            suffix: "2".to_string(),
+            email: "test2@hermes.com".to_string(),
+            password: "test".to_string(),
+        })
+        .await
+        .unwrap()
+        .into_inner();
+
+    let (send_user, send_token) = (
+        send_res.created_user.unwrap(),
+        send_res.token.unwrap().inner,
+    );
+
+    let participants: Vec<grpc::User> = vec![send_user.clone(), recv_user.clone()];
+
+    let mut convo_client = ConvoServiceClient::connect(soc).await.unwrap();
+    let mut create_convo_req = Request::new(CreateConvoReq {
+        participants: Some(UserList {
+            inner: participants,
+        }),
+    });
+
+    create_convo_req
+        .metadata_mut()
+        .insert("authorization", send_token.parse().unwrap());
+
+    let convo = convo_client
+        .create(create_convo_req)
+        .await
+        .unwrap()
+        .into_inner()
+        .created
+        .unwrap();
+
+    let reciever = tokio::spawn(async move {
         let mut client = MsgServiceClient::connect(soc).await.unwrap();
+        let mut recv_req = RecieveRequest {
+            author: "doesnt matter".to_string(),
+        }
+        .into_request();
 
-        let message_count = 1_000;
+        recv_req
+            .metadata_mut()
+            .insert("authorization", recv_token.parse().unwrap());
 
         let mut msg_stream = client
-            .recieve_incoming(RecieveRequest {
-                author: "doesnt matter".to_string(),
-            })
+            .recieve_incoming(recv_req)
             .await
             .unwrap()
             .into_inner();
 
-        for _ in 0..message_count {
-            let _msg = client
-                .send(SendMsgReq {
-                    convo: None,
-                    author: None,
-                    body: "doesnt matter".to_string(),
-                    unix_time: 123456789,
-                })
-                .await
-                .unwrap();
+        let mut count = 0;
+        while let Some(y) = timeout(test_duration, msg_stream.next())
+            .await
+            .ok()
+            .flatten()
+        {
+            count += 1;
+            //eprintln!("{:#?}", y.unwrap());
         }
 
-        tokio::spawn(async move {
-            let mut count = 0;
-            while let Some(y) = timeout(test_duration, msg_stream.next())
-                .await
-                .ok()
-                .flatten()
-            {
-                count += 1;
-                eprintln!("{:#?}", y.unwrap());
-            }
-            assert_eq!(count, message_count); // making sure we didnt lose any messages
-        })
-        .await
-        .unwrap();
+        assert_eq!(count, message_count); // making sure we didnt lose any messages
     });
 
-    let (server, client) = tokio::join!(server, client);
+    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+
+    let sender = tokio::spawn(async move {
+        let mut client = MsgServiceClient::connect(soc).await.unwrap();
+
+        for _ in 0..message_count {
+            let mut req = SendMsgReq {
+                convo: Some(convo.clone()), //NOTE: idk why i need to clone here ima be honest
+                author: Some(send_user.clone()), // here too
+                body: "doesnt matter".to_string(),
+                unix_time: 123456789,
+            }
+            .into_request();
+            req.metadata_mut()
+                .insert("authorization", send_token.parse().unwrap());
+            let _msg = client.send(req).await.unwrap();
+        }
+    });
+
+    let (server, reciever, sender) = tokio::join!(server, reciever, sender);
 
     server.expect("Server Panic");
-    client.expect("Client Panic");
+    reciever.expect("Reciever Panic");
+    sender.expect("Sender Panic");
+    Ok(())
 }

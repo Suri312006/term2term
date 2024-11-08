@@ -16,3 +16,13 @@ impl From<User> for grpc::User {
         }
     }
 }
+
+impl From<grpc::User> for User {
+    fn from(value: grpc::User) -> Self {
+        User {
+            id: value.id,
+            name: value.name,
+            suffix: value.suffix,
+        }
+    }
+}

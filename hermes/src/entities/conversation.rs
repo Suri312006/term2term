@@ -10,6 +10,15 @@ pub struct Conversation {
 
 impl From<Conversation> for grpc::Convo {
     fn from(value: Conversation) -> Self {
-        todo!()
+        grpc::Convo {
+            id: value.id,
+            participants: Some(grpc::UserList {
+                inner: value
+                    .participants
+                    .into_iter()
+                    .map(Into::<grpc::User>::into)
+                    .collect(),
+            }),
+        }
     }
 }

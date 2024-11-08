@@ -1,10 +1,9 @@
 use std::sync::Arc;
 
+use dashmap::DashMap;
+use log::error;
 use sqlx::{Pool, Postgres};
-use tokio::sync::{
-    mpsc::{self, Sender},
-    Mutex,
-};
+use tokio::sync::mpsc::{self, Sender};
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 
@@ -16,14 +15,14 @@ use crate::grpc::{
 #[derive(Debug)]
 pub struct MessageServer {
     db: Pool<Postgres>,
-    senders: Mutex<Vec<Sender<Result<Msg, Status>>>>,
+    connections: DashMap<String, Sender<Result<Msg, Status>>>,
 }
 
 impl MessageServer {
     pub fn new(db: Pool<Postgres>) -> Self {
         MessageServer {
             db,
-            senders: Mutex::new(vec![].into()),
+            connections: DashMap::new(),
         }
     }
 }
@@ -35,40 +34,67 @@ impl MsgService for MessageServer {
     type RecieveIncomingStream = ReceiverStream<Result<Msg, Status>>;
 
     async fn recieve_incoming(
-        &self,
+        self: Arc<Self>,
         req: Request<RecieveRequest>,
     ) -> Result<Response<Self::RecieveIncomingStream>, Status> {
-        let (mut tx, rx) = mpsc::channel::<Result<Msg, Status>>(4);
+        let (headers, _ext, _req) = req.into_parts();
+        let user_id = headers
+            .get("user_id")
+            .ok_or_else(|| {
+                error!("User id was not passed down into headers!!");
+                Status::internal("try again later")
+            })?
+            .to_str()
+            .map_err(|err| {
+                error!("{err}");
+                Status::internal("weird.")
+            })?;
+        let (tx, rx) = mpsc::channel::<Result<Msg, Status>>(4);
 
-        let x = self.senders.lock().await.push(tx);
+        //NOTE: may deadlock?? so idk
+        let _ = self.connections.insert(user_id.to_string(), tx);
 
         Ok(Response::new(ReceiverStream::new(rx)))
     }
 
-    async fn send(&self, req: Request<SendMsgReq>) -> Result<Response<SendMsgRes>, Status> {
-        let mut senders = self.senders.lock().await;
-        let y = senders.get_mut(0).unwrap();
-
-        y.send(Ok(Msg {
-            id: "lol".to_string(),
-            author: None,
-            body: "wtf".to_string(),
-            convo: None,
-            is_read: false,
-            recipient: None,
-            unix_time: 123456,
-        }))
-        .await
-        .unwrap();
+    async fn send(
+        self: Arc<Self>,
+        req: Request<SendMsgReq>,
+    ) -> Result<Response<SendMsgRes>, Status> {
+        tokio::spawn(async move {
+            let req = req.into_inner();
+            for recipient in req.convo.unwrap().participants.unwrap().inner {
+                // its fine for us if the recipient isnt found inside of connections
+                if let Some(conn) = self.connections.get(&recipient.id) {
+                    conn.send(Ok(Msg {
+                        id: "lol".to_string(),
+                        author: None,
+                        body: "wtf".to_string(),
+                        convo: None,
+                        is_read: false,
+                        recipient: None,
+                        unix_time: 123456,
+                    }))
+                    .await
+                    .unwrap();
+                };
+            }
+        });
 
         Ok(Response::new(SendMsgRes { sent_msg: None }))
     }
 
-    async fn delete(&self, req: Request<DeleteMsgReq>) -> Result<Response<DeleteMsgRes>, Status> {
+    async fn delete(
+        self: Arc<Self>,
+        req: Request<DeleteMsgReq>,
+    ) -> Result<Response<DeleteMsgRes>, Status> {
         todo!()
     }
 
-    async fn search(&self, req: Request<SearchMsgReq>) -> Result<Response<SearchMsgRes>, Status> {
+    async fn search(
+        self: Arc<Self>,
+        req: Request<SearchMsgReq>,
+    ) -> Result<Response<SearchMsgRes>, Status> {
         todo!()
     }
 }

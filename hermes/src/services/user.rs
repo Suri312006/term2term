@@ -1,11 +1,12 @@
 use core::error;
+use std::sync::Arc;
 
 use log::error;
 use sqlx::{Pool, Postgres};
 use tonic::{Request, Response, Status};
 
 use crate::{
-    entities::user::User,
+    entities::User,
     grpc::{
         self, user_service_server::UserService, DeleteUserReq, DeleteUserRes, Existence,
         SearchUserReq, SearchUserReqEnum, SearchUserRes, UpdateUserReq, UpdateUserRes,
@@ -25,7 +26,7 @@ impl UserServer {
 #[tonic::async_trait]
 impl UserService for UserServer {
     async fn search(
-        &self,
+        self: Arc<Self>,
         request: Request<SearchUserReq>,
     ) -> Result<Response<SearchUserRes>, Status> {
         let request = request.into_inner();
@@ -70,11 +71,14 @@ impl UserService for UserServer {
         }))
     }
 
-    async fn update(&self, req: Request<UpdateUserReq>) -> Result<Response<UpdateUserRes>, Status> {
+    async fn update(
+        self: Arc<Self>,
+        req: Request<UpdateUserReq>,
+    ) -> Result<Response<UpdateUserRes>, Status> {
         let (headers, ext, req) = req.into_parts();
         let user_id = headers
             .get("user_id")
-            .ok_or({
+            .ok_or_else(|| {
                 error!("User id was not passed down into headers!!");
                 Status::internal("try again later")
             })?
@@ -135,11 +139,14 @@ impl UserService for UserServer {
         }))
     }
 
-    async fn delete(&self, req: Request<DeleteUserReq>) -> Result<Response<DeleteUserRes>, Status> {
+    async fn delete(
+        self: Arc<Self>,
+        req: Request<DeleteUserReq>,
+    ) -> Result<Response<DeleteUserRes>, Status> {
         let (headers, _ext, _req) = req.into_parts();
         let user_id = headers
             .get("user_id")
-            .ok_or({
+            .ok_or_else(|| {
                 error!("User id was not passed down into headers!!");
                 Status::internal("try again later")
             })?

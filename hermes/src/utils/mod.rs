@@ -1,3 +1,6 @@
 mod id;
+mod log;
 
-pub use id::*;
+pub(crate) use log::*;
+
+pub(crate) use id::*;

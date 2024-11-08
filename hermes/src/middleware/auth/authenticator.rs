@@ -69,10 +69,10 @@ impl Authenticator {
 
         let secret = jsonwebtoken::DecodingKey::from_secret(self.config.auth_secret.as_bytes());
 
-        let res = jsonwebtoken::decode::<Claims>(token, &secret, &validation)
-            .map_err(|_e| AuthError::InvalidToken)?;
-
-        println!("{:#?}", res);
+        let res = jsonwebtoken::decode::<Claims>(token, &secret, &validation).map_err(|err| {
+            error!("{err}");
+            AuthError::InvalidToken
+        })?;
 
         Ok(res)
     }
