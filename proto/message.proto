@@ -12,7 +12,6 @@ message Msg {
   string id = 1;
   Convo convo = 2;
   User author = 3;
-  User recipient = 4;
   string body = 5;
   uint64 unix_time = 6;
   bool isRead = 7;

@@ -9,8 +9,6 @@ use hermes::{
     },
     Config, Hermes,
 };
-use log::{info, Log};
-use testcontainers_modules::{postgres::Postgres, testcontainers::runners::AsyncRunner};
 use tokio::time::timeout;
 use tokio_stream::StreamExt;
 use tonic::{IntoRequest, Request};
@@ -31,13 +29,11 @@ pub async fn test_message_stream_with_test_db() -> Result<()> {
     let message_count = 1_000;
 
     let server = tokio::spawn(async move {
-        // we dont care about this time out
         let hermes = Hermes::new(conf).await.unwrap();
-        // strip timeout error and only return inner result
         timeout(test_duration, hermes.run())
             .await
-            .unwrap_or_else(|_x| Ok(())) // this line gets rid of the timeout
-            // error
+            .unwrap_or_else(|_x| Ok(())) // this line gets rid of
+            // the timeout result
             .unwrap();
     });
 
@@ -100,6 +96,7 @@ pub async fn test_message_stream_with_test_db() -> Result<()> {
         .created
         .unwrap();
 
+    let send_user_cpy = send_user.clone();
     let reciever = tokio::spawn(async move {
         let mut client = MsgServiceClient::connect(soc).await.unwrap();
         let mut recv_req = RecieveRequest {
@@ -123,8 +120,10 @@ pub async fn test_message_stream_with_test_db() -> Result<()> {
             .ok()
             .flatten()
         {
+            let msg = y.expect("message is cooked");
+            assert_eq!(msg.body, "holy penis");
+            assert_eq!(msg.author.unwrap(), send_user_cpy);
             count += 1;
-            //eprintln!("{:#?}", y.unwrap());
         }
 
         assert_eq!(count, message_count); // making sure we didnt lose any messages
@@ -139,7 +138,7 @@ pub async fn test_message_stream_with_test_db() -> Result<()> {
             let mut req = SendMsgReq {
                 convo: Some(convo.clone()), //NOTE: idk why i need to clone here ima be honest
                 author: Some(send_user.clone()), // here too
-                body: "doesnt matter".to_string(),
+                body: "holy penis".to_string(),
                 unix_time: 123456789,
             }
             .into_request();
