@@ -2209,6 +2209,7 @@ dependencies = [
  "strum",
  "tokio",
  "tokio-util",
+ "toml",
  "tracing",
  "tracing-error",
  "tracing-subscriber",

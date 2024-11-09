@@ -9,11 +9,11 @@ use directories::ProjectDirs;
 use lazy_static::lazy_static;
 use ratatui::style::{Color, Modifier, Style};
 use serde::{de::Deserializer, Deserialize};
-use tracing::error;
+use tracing::{error, info, warn};
 
 use crate::{action::Action, app::Mode};
 
-const CONFIG: &str = include_str!("../.config/config.json5");
+const CONFIG: &str = include_str!("../.config/config.toml");
 
 #[derive(Clone, Debug, Deserialize, Default)]
 pub struct AppConfig {
@@ -47,7 +47,7 @@ lazy_static! {
 
 impl Config {
     pub fn new() -> Result<Self, config::ConfigError> {
-        let default_config: Config = json5::from_str(CONFIG).unwrap();
+        let default_config: Config = toml::from_str(CONFIG).unwrap();
         let data_dir = get_data_dir();
         let config_dir = get_config_dir();
         let mut builder = config::Config::builder()
@@ -55,13 +55,15 @@ impl Config {
             .set_default("config_dir", config_dir.to_str().unwrap())?;
 
         let config_files = [
-            ("config.json5", config::FileFormat::Json5),
+            //("config.json5", config::FileFormat::Json5),
             ("config.json", config::FileFormat::Json),
-            ("config.yaml", config::FileFormat::Yaml),
+            //("config.yaml", config::FileFormat::Yaml),
             ("config.toml", config::FileFormat::Toml),
-            ("config.ini", config::FileFormat::Ini),
+            //("config.ini", config::FileFormat::Ini),
         ];
+
         let mut found_config = false;
+
         for (file, format) in &config_files {
             let source = config::File::from(config_dir.join(file))
                 .format(*format)
@@ -72,11 +74,12 @@ impl Config {
             }
         }
         if !found_config {
-            error!("No configuration file found. Application may not behave as expected");
+            warn!("No configuration file found. Using Default Bindings.");
         }
 
         let mut cfg: Self = builder.build()?.try_deserialize()?;
 
+        // this iterates through default bindings and adds them into the new hashmap??
         for (mode, default_bindings) in default_config.keybindings.iter() {
             let user_bindings = cfg.keybindings.entry(*mode).or_default();
             for (key, cmd) in default_bindings.iter() {
@@ -85,6 +88,7 @@ impl Config {
                     .or_insert_with(|| cmd.clone());
             }
         }
+        // this iterates through default styles and adds them into the new hashmap??
         for (mode, default_styles) in default_config.styles.iter() {
             let user_styles = cfg.styles.entry(*mode).or_default();
             for (style_key, style) in default_styles.iter() {
@@ -119,7 +123,7 @@ pub fn get_config_dir() -> PathBuf {
 }
 
 fn project_directory() -> Option<ProjectDirs> {
-    ProjectDirs::from("com", "kdheepak", env!("CARGO_PKG_NAME"))
+    ProjectDirs::from("com", "suri", env!("CARGO_PKG_NAME"))
 }
 
 #[derive(Clone, Debug, Default, Deref, DerefMut)]

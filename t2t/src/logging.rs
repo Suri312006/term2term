@@ -1,3 +1,5 @@
+use std::io;
+
 use color_eyre::Result;
 use tracing_error::ErrorLayer;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
@@ -28,8 +30,22 @@ pub fn init() -> Result<()> {
         .with_target(false)
         .with_ansi(false)
         .with_filter(env_filter);
+
+    let env_filter = EnvFilter::builder().with_default_directive(tracing::Level::INFO.into());
+    let env_filter = env_filter
+        .try_from_env()
+        .or_else(|_| env_filter.with_env_var(LOG_ENV.clone()).from_env())?;
+
+    let stdout_subscriber = fmt::layer()
+        .with_writer(io::stdout)
+        .with_line_number(true)
+        .with_target(false)
+        .with_ansi(false)
+        .with_filter(env_filter);
+
     tracing_subscriber::registry()
         .with(file_subscriber)
+        .with(stdout_subscriber)
         .with(ErrorLayer::default())
         .try_init()?;
     Ok(())
