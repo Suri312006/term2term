@@ -1,5 +1,11 @@
-[keybindings.Home]
+[keybindings.Editing]
+"Esc" = "NormalMode"
+"Enter" = "Enter"
+"<Ctrl-c>" = "Quit"
+[keybindings.Normal]
 "q" = "Quit"
 "<Ctrl-d>" = "Quit"
 "<Ctrl-c>" = "Quit"
 "<Ctrl-z>" = "Suspend"
+"Enter" = "Enter"
+"i" = "EditingMode"

@@ -22,19 +22,16 @@ impl Home {
 
 impl Component for Home {
     fn register_action_handler(&mut self, tx: UnboundedSender<Action>) -> Result<()> {
-        self.fps_counter.register_action_handler(tx.clone())?;
         self.command_tx = Some(tx);
         Ok(())
     }
 
     fn register_config_handler(&mut self, config: Config) -> Result<()> {
-        self.fps_counter.register_config_handler(config.clone())?;
         self.config = config;
         Ok(())
     }
 
     fn update(&mut self, action: Action) -> Result<Option<Action>> {
-        self.fps_counter.update(action.clone())?;
         match action {
             Action::Tick => {
                 // add any logic here that should run on every tick

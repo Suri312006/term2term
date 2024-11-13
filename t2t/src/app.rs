@@ -1,13 +1,15 @@
+use std::default;
+
 use color_eyre::Result;
 use crossterm::event::KeyEvent;
 use ratatui::prelude::Rect;
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
-use tracing::{debug, info};
+use tracing::{debug, info, trace};
 
 use crate::{
     action::Action,
-    components::{fps::FpsCounter, home::Home, welcome::Welcome, Component},
+    components::{binds::BindsRow, fps::FpsCounter, home::Home, welcome::Welcome, Component},
     config::Config,
     tui::{Event, Tui},
 };
@@ -28,8 +30,8 @@ pub struct App {
 #[derive(Default, Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Mode {
     #[default]
-    Home,
-    Welcome,
+    Normal,
+    Editing,
 }
 
 impl App {
@@ -38,11 +40,11 @@ impl App {
         Ok(Self {
             tick_rate,
             frame_rate,
-            components: vec![Box::new(Welcome::new())],
+            components: vec![Box::new(Welcome::new()), Box::new(BindsRow::new())],
             should_quit: false,
             should_suspend: false,
             config: Config::new()?,
-            mode: Mode::Home,
+            mode: Default::default(),
             last_tick_key_events: Vec::new(),
             action_tx,
             action_rx,
@@ -113,7 +115,7 @@ impl App {
         };
         match keymap.get(&vec![key]) {
             Some(action) => {
-                info!("Got action: {action:?}");
+                debug!("KeyPress! Got action: {action:?}");
                 action_tx.send(action.clone())?;
             }
             _ => {
@@ -134,7 +136,7 @@ impl App {
     fn handle_actions(&mut self, tui: &mut Tui) -> Result<()> {
         while let Ok(action) = self.action_rx.try_recv() {
             if action != Action::Tick && action != Action::Render {
-                debug!("{action:?}");
+                info!("Running Action: {action:?}");
             }
             match action {
                 Action::Tick => {
@@ -146,6 +148,9 @@ impl App {
                 Action::ClearScreen => tui.terminal.clear()?,
                 Action::Resize(w, h) => self.handle_resize(tui, w, h)?,
                 Action::Render => self.render(tui)?,
+                Action::EditingMode => self.mode = Mode::Editing,
+                Action::NormalMode => self.mode = Mode::Normal,
+
                 _ => {}
             }
             for component in self.components.iter_mut() {

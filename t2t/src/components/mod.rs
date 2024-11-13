@@ -8,6 +8,7 @@ use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{action::Action, config::Config, tui::Event};
 
+pub mod binds;
 pub mod fps;
 pub mod home;
 pub mod welcome;

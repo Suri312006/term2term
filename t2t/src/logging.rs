@@ -16,7 +16,7 @@ pub fn init() -> Result<()> {
     std::fs::create_dir_all(directory.clone())?;
     let log_path = directory.join(LOG_FILE.clone());
     let log_file = std::fs::File::create(log_path)?;
-    let env_filter = EnvFilter::builder().with_default_directive(tracing::Level::INFO.into());
+    let env_filter = EnvFilter::builder().with_default_directive(tracing::Level::DEBUG.into());
     // If the `RUST_LOG` environment variable is set, use that as the default, otherwise use the
     // value of the `LOG_ENV` environment variable. If the `LOG_ENV` environment variable contains
     // errors, then this will return an error.
@@ -31,21 +31,21 @@ pub fn init() -> Result<()> {
         .with_ansi(false)
         .with_filter(env_filter);
 
-    let env_filter = EnvFilter::builder().with_default_directive(tracing::Level::INFO.into());
-    let env_filter = env_filter
-        .try_from_env()
-        .or_else(|_| env_filter.with_env_var(LOG_ENV.clone()).from_env())?;
-
-    let stdout_subscriber = fmt::layer()
-        .with_writer(io::stdout)
-        .with_line_number(true)
-        .with_target(false)
-        .with_ansi(false)
-        .with_filter(env_filter);
+    //let env_filter = EnvFilter::builder().with_default_directive(tracing::Level::INFO.into());
+    //let env_filter = env_filter
+    //    .try_from_env()
+    //    .or_else(|_| env_filter.with_env_var(LOG_ENV.clone()).from_env())?;
+    //
+    //let stdout_subscriber = fmt::layer()
+    //    .with_writer(io::stdout)
+    //    .with_line_number(true)
+    //    .with_target(false)
+    //    .with_ansi(false)
+    //    .with_filter(env_filter);
 
     tracing_subscriber::registry()
         .with(file_subscriber)
-        .with(stdout_subscriber)
+        //.with(stdout_subscriber)
         .with(ErrorLayer::default())
         .try_init()?;
     Ok(())
