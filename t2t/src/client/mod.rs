@@ -1,36 +1,39 @@
 mod commands;
-use std::sync::mpsc;
 
+use color_eyre::eyre::Result;
 pub use commands::*;
-use tonic::transport::Channel;
-
-use crate::grpc::{
-    auth_service_client::AuthServiceClient, convo_service_client::ConvoServiceClient,
-    msg_service_client::MsgServiceClient, user_service_client::UserServiceClient,
-};
+mod handlers;
+use handlers::*;
+use tokio::sync::mpsc;
 
 pub struct Client {
     handlers: Handlers,
-    command_rx: mpsc::Receiver<Command>,
-    response_tx: mpsc::Sender<Command>,
+    command_rx: mpsc::UnboundedReceiver<Command>,
+    response_tx: mpsc::UnboundedSender<Command>,
 }
 
 impl Client {
     // run this inside a tokio spawn
-    fn new() -> Self {
-        todo!();
+    pub async fn new(
+        reciever: mpsc::UnboundedReceiver<Command>,
+        responder: mpsc::UnboundedSender<Command>,
+    ) -> Result<Self> {
+        Ok(Client {
+            handlers: Handlers::connect().await?,
+            command_rx: reciever,
+            response_tx: responder,
+        })
+    }
+
+    /// run inside tokio task
+    pub async fn run(&mut self) -> Result<()> {
+        // loop over every msg and handle that shit
+        panic!("PENIS");
+        while let Some(msg) = self.command_rx.recv().await {
+            todo!();
+        }
+        Ok(())
     }
 }
 
 // what should i do
-impl Default for Handlers {
-    fn default() -> Self {
-        todo!();
-    }
-}
-struct Handlers {
-    message_handler: MsgServiceClient<Channel>,
-    user_handler: UserServiceClient<Channel>,
-    auth_handler: AuthServiceClient<Channel>,
-    convo_handler: ConvoServiceClient<Channel>,
-}

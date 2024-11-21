@@ -17,7 +17,7 @@ pub mod welcome;
 ///
 /// Implementors of this trait can be registered with the main application loop and will be able to
 /// receive events, update state, and be rendered on the screen.
-pub trait Component {
+pub trait Component: Send + Sync {
     /// Register an action handler that can send actions for processing if necessary.
     ///
     /// # Arguments
