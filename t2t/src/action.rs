@@ -13,6 +13,20 @@ pub enum Action {
     Error(String),
     Help,
     Enter,
-    EditingMode,
-    NormalMode,
+    Mode(Mode),
+    Selection(Selection),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
+//Selection here
+pub enum Selection {
+    Name,
+    Suffix,
+}
+
+#[derive(Default, Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum Mode {
+    #[default]
+    Normal,
+    Editing,
 }

@@ -11,7 +11,7 @@ use ratatui::style::{Color, Modifier, Style};
 use serde::{de::Deserializer, Deserialize};
 use tracing::{error, info, warn};
 
-use crate::{action::Action, app::Mode};
+use crate::{action::Action, action::Mode};
 
 const CONFIG: &str = include_str!("../.config/config.toml");
 

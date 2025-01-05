@@ -5,7 +5,10 @@ use ratatui::{
 };
 use tracing::info;
 
-use crate::{action::Action, app::Mode, config::Config};
+use crate::{
+    action::{Action, Mode, Selection},
+    config::Config,
+};
 
 use super::Component;
 
@@ -29,14 +32,16 @@ impl Component for BindsRow {
 
     fn update(&mut self, action: Action) -> Result<Option<Action>> {
         match action {
-            Action::NormalMode => {
-                self.current_mode = Mode::Normal;
-                Ok(None)
-            }
-            Action::EditingMode => {
-                self.current_mode = Mode::Editing;
-                Ok(None)
-            }
+            Action::Mode(m) => match m {
+                Mode::Normal => {
+                    self.current_mode = Mode::Normal;
+                    Ok(None)
+                }
+                Mode::Editing => {
+                    self.current_mode = Mode::Editing;
+                    Ok(None)
+                }
+            },
             _ => Ok(None),
         }
     }
@@ -50,15 +55,12 @@ impl Component for BindsRow {
                 .iter()
                 .len()
         ];
-        //info!("{:#?}", partitions_vec.len());
-        //
+
         let vert =
-            Layout::vertical([Constraint::Percentage(92), Constraint::Percentage(8)]).split(area);
-        //Layout::vertical([Constraint::Percentage(95), Constraint::Percentage(5)]).split(area);
+            Layout::vertical([Constraint::Percentage(98), Constraint::Percentage(2)]).split(area);
 
         let chunks = Layout::default()
             .direction(Direction::Horizontal)
-            .margin(1)
             .constraints(&partitions_vec)
             .split(vert[1]);
 
@@ -70,23 +72,19 @@ impl Component for BindsRow {
             .iter()
             .enumerate()
         {
+            let text = keys
+                .iter()
+                .map(|k| Span::from(format!("{} - {}", k.code, action)))
+                .collect::<Vec<Span>>();
+
+            let block = Block::new().style(Style::new().bg(Color::Black));
+
             frame.render_widget(
-                Paragraph::new(Text::from(Line::from(
-                    keys.iter()
-                        .map(|k| {
-                            Span::from(format!("{} - {}", k.code, action))
-                            //.bg(Color::from_u32(0x00111111 * i as u32))
-                        })
-                        .collect::<Vec<Span>>(),
-                )))
-                .block(
-                    Block::new()
-                        .style(Style::new().bg(Color::Black))
-                        .padding(Padding::new(0, 0, 2, 0)),
-                )
-                .alignment(Alignment::Left),
+                Paragraph::new(Text::from(Line::from(text)))
+                    .block(block)
+                    .alignment(Alignment::Left),
                 chunks[i],
-            )
+            );
         }
         Ok(())
     }

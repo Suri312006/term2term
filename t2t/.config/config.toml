@@ -1,5 +1,5 @@
 [keybindings.Editing]
-"Esc" = "NormalMode"
+"Esc" = { Mode = "Normal" }
 "Enter" = "Enter"
 "<Ctrl-c>" = "Quit"
 [keybindings.Normal]
@@ -8,4 +8,4 @@
 "<Ctrl-c>" = "Quit"
 "<Ctrl-z>" = "Suspend"
 "Enter" = "Enter"
-"i" = "EditingMode"
+"i" = { Mode = "Editing" }

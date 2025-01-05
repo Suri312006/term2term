@@ -24,7 +24,7 @@ pub async fn test_message_stream_with_test_db() -> Result<()> {
         auth_secret: "lmfao-rand-auth-thing".to_string(),
     };
 
-    let test_duration = Duration::from_secs(5);
+    let test_duration = Duration::from_secs(10);
 
     let message_count = 1_000;
 

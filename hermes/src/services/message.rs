@@ -37,7 +37,7 @@ impl MessageServer {
 impl MsgService for MessageServer {
     type RecieveIncomingStream = ReceiverStream<Result<Msg, Status>>;
 
-    async fn recieve_incoming(
+    async fn receive_incoming(
         self: Arc<Self>,
         req: Request<RecieveRequest>,
     ) -> Result<Response<Self::RecieveIncomingStream>, Status> {
@@ -101,14 +101,14 @@ ConvoSelection AS (
 InsertMessage AS (
     INSERT INTO Messages (MsgPubId, AuthorId, ParentConvoId, Body)
     VALUES (
-        $3, 
+        $3,
         (SELECT UserId FROM UserSelection),
         (SELECT ConvoId FROM ConvoSelection),
         $4
     )
     RETURNING *
 )
-SELECT 
+SELECT
     InsertMessage.MsgPubId AS id,
     InsertMessage.Body,
     InsertMessage.CreatedAt AS MsgCreatedAt,
@@ -118,12 +118,12 @@ SELECT
     Conversations.ConvoPubId
 FROM
     InsertMessage
-JOIN 
+JOIN
 
     Users ON Users.UserId = InsertMessage.AuthorId
-JOIN 
+JOIN
     Conversations ON Conversations.ConvoId = InsertMessage.ParentConvoId
-    
+
 "#,
             user_id,
             convo_id,

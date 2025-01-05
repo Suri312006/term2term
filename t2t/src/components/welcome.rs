@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use color_eyre::Result;
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{prelude::*, widgets::*};
@@ -6,13 +8,18 @@ use tracing::{debug, info};
 use tui_input::{backend::crossterm::EventHandler, Input};
 
 use super::Component;
-use crate::{action::Action, config::Config, utils::center};
+use crate::{
+    action::{Action, Mode, Selection},
+    config::Config,
+    utils::center,
+};
 
 #[derive(Default)]
 pub struct Welcome {
     command_tx: Option<UnboundedSender<Action>>,
     config: Config,
     state_handler: PageStateHandler,
+    mode: Mode,
 }
 
 impl Welcome {
@@ -64,9 +71,9 @@ impl PageStateHandler {
 }
 
 const TITLE: &str = r#"
- _____                     ____    _____                   
-|_   _|__ _ __ _ __ ___   |___ \  |_   _|__ _ __ _ __ ___  
-  | |/ _ \ '__| '_ ` _ \    __) |   | |/ _ \ '__| '_ ` _ \ 
+ _____                     ____    _____
+|_   _|__ _ __ _ __ ___   |___ \  |_   _|__ _ __ _ __ ___
+  | |/ _ \ '__| '_ ` _ \    __) |   | |/ _ \ '__| '_ ` _ \
   | |  __/ |  | | | | | |  / __/    | |  __/ |  | | | | | |
   |_|\___|_|  |_| |_| |_| |_____|   |_|\___|_|  |_| |_| |_|
         "#;
@@ -95,7 +102,7 @@ impl Component for Welcome {
                     self.command_tx
                         .clone()
                         .expect("Expected to have command transmitter")
-                        .send(Action::EditingMode)?;
+                        .send(Action::Mode(Mode::Editing))?;
                     self.state_handler.next();
 
                     //if let PageState::NameAndSuffix(x) = &mut self.state_handler.inner {
@@ -111,24 +118,41 @@ impl Component for Welcome {
                     info!("got suffix: {}", inputs.suffix.value());
                 }
                 PageState::RedirectToHome => {
-                    // here we are just checking the recieve on the client that something came
+                    // here we are just checking the receive on the client that something came
                     // back!
                 }
             },
 
-            Action::EditingMode => {
-                if let PageState::NameAndSuffix(x) = &mut self.state_handler.inner {
-                    if x.cached.is_none() {
-                        x.active = Some(ActiveInput::Name);
-                    } else {
-                        x.active = x.cached;
+            Action::Mode(m) => match m {
+                Mode::Editing => {
+                    if let PageState::NameAndSuffix(x) = &mut self.state_handler.inner {
+                        if x.cached.is_none() {
+                            x.active = Some(ActiveInput::Name);
+                        } else {
+                            x.active = x.cached;
+                        }
                     }
+                    self.mode = Mode::Editing;
                 }
-            }
-            Action::NormalMode => {
+                Mode::Normal => {
+                    if let PageState::NameAndSuffix(x) = &mut self.state_handler.inner {
+                        x.cached = x.active;
+                        x.active = None;
+                    }
+                    self.mode = Mode::Normal;
+                }
+            },
+
+            Action::Selection(sel) => {
                 if let PageState::NameAndSuffix(x) = &mut self.state_handler.inner {
-                    x.cached = x.active;
-                    x.active = None;
+                    match sel {
+                        Selection::Name => {
+                            x.active = Some(ActiveInput::Name);
+                        }
+                        Selection::Suffix => {
+                            x.active = Some(ActiveInput::Suffix);
+                        }
+                    }
                 }
             }
             _ => {}
@@ -137,18 +161,33 @@ impl Component for Welcome {
     }
 
     fn handle_key_event(&mut self, key: crossterm::event::KeyEvent) -> Result<Option<Action>> {
-        match &mut self.state_handler.inner {
-            PageState::NameAndSuffix(inputs) => match key.code {
-                // switches the current active input
-                KeyCode::Tab => {
-                    match inputs.active {
-                        Some(ActiveInput::Name) => inputs.active = Some(ActiveInput::Suffix),
-                        Some(ActiveInput::Suffix) => inputs.active = Some(ActiveInput::Name),
+        match self.mode {
+            Mode::Normal => {
+                match &mut self.state_handler.inner {
+                    PageState::NameAndSuffix(inputs) => match key.code {
+                        // switches the current active input
+                        KeyCode::Tab => {
+                            match inputs.active {
+                                Some(ActiveInput::Name) => {
+                                    inputs.active = Some(ActiveInput::Suffix)
+                                }
+                                Some(ActiveInput::Suffix) => {
+                                    inputs.active = Some(ActiveInput::Name)
+                                }
+                                _ => {}
+                            };
+                        }
+
+                        KeyCode::Char('1') => inputs.active = Some(ActiveInput::Name),
+                        KeyCode::Char('2') => inputs.active = Some(ActiveInput::Suffix),
                         _ => {}
-                    };
-                    Ok(None)
+                    },
+                    _ => {}
                 }
-                _ => {
+            }
+
+            Mode::Editing => {
+                if let PageState::NameAndSuffix(inputs) = &mut self.state_handler.inner {
                     match inputs.active {
                         Some(ActiveInput::Name) => {
                             inputs.name.handle_event(&crossterm::event::Event::Key(key));
@@ -160,11 +199,41 @@ impl Component for Welcome {
                         }
                         _ => {}
                     }
-                    Ok(None)
                 }
-            },
-            _ => Ok(None),
+            }
         }
+        Ok(None)
+
+        //TODO: want to make sure its not editing when we are in typing mode
+        // match &mut self.state_handler.inner {
+        //     PageState::NameAndSuffix(inputs) => match key.code {
+        //         // switches the current active input
+        //         KeyCode::Tab => {
+        //             match inputs.active {
+        //                 Some(ActiveInput::Name) => inputs.active = Some(ActiveInput::Suffix),
+        //                 Some(ActiveInput::Suffix) => inputs.active = Some(ActiveInput::Name),
+        //                 _ => {}
+        //             };
+        //             Ok(None)
+        //         }
+
+        //         _ => {
+        //             match inputs.active {
+        //                 Some(ActiveInput::Name) => {
+        //                     inputs.name.handle_event(&crossterm::event::Event::Key(key));
+        //                 }
+        //                 Some(ActiveInput::Suffix) => {
+        //                     inputs
+        //                         .suffix
+        //                         .handle_event(&crossterm::event::Event::Key(key));
+        //                 }
+        //                 _ => {}
+        //             }
+        //             Ok(None)
+        //         }
+        //     },
+        //     _ => Ok(None),
+        // }
     }
 
     fn draw(&mut self, frame: &mut Frame, area: Rect) -> Result<()> {
