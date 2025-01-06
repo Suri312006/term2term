@@ -1,4 +1,4 @@
-use std::default;
+use std::{default, sync::Arc};
 
 use color_eyre::Result;
 use crossterm::event::KeyEvent;
@@ -12,7 +12,7 @@ use crate::{
     components::{binds::BindsRow, fps::FpsCounter, home::Home, welcome::Welcome, Component},
     config::Config,
     tui::{Event, Tui},
-};
+}
 
 pub struct App {
     config: Config,
@@ -25,11 +25,15 @@ pub struct App {
     last_tick_key_events: Vec<KeyEvent>,
     action_tx: mpsc::UnboundedSender<Action>,
     action_rx: mpsc::UnboundedReceiver<Action>,
+    //client: Client,
+    //client_tx: mpsc::UnboundedSender<Command>,
+    //client_rx: mpsc::UnboundedReceiver<Command>,
 }
 
 impl App {
     pub fn new(tick_rate: f64, frame_rate: f64) -> Result<Self> {
         let (action_tx, action_rx) = mpsc::unbounded_channel();
+        //
         Ok(Self {
             tick_rate,
             frame_rate,
@@ -45,6 +49,17 @@ impl App {
     }
 
     pub async fn run(&mut self) -> Result<()> {
+        //NOTE: <recipient>_<sender|receiver>
+        let (client_tx, client_rx) = mpsc::unbounded_channel();
+        let (app_tx, app_rx) = mpsc::unbounded_channel();
+
+        let mut client = Client::new(client_rx, app_tx).await?;
+
+        // NOTE: if this panics then we dont know
+        let client_handle = tokio::spawn(async move {
+            client.run().await.unwrap();
+        });
+
         let mut tui = Tui::new()?
             // .mouse(true) // uncomment this line to enable mouse support
             .tick_rate(self.tick_rate)
@@ -74,6 +89,11 @@ impl App {
             } else if self.should_quit {
                 tui.stop()?;
                 break;
+            }
+            if client_handle.is_finished() {
+                // this should panic if there was some error i assume
+                client_handle.await.unwrap();
+                return Ok(());
             }
         }
         tui.exit()?;
