@@ -77,6 +77,27 @@ const TITLE: &str = r#"
   | |  __/ |  | | | | | |  / __/    | |  __/ |  | | | | | |
   |_|\___|_|  |_| |_| |_| |_____|   |_|\___|_|  |_| |_| |_|
         "#;
+// const l1: &str = r#" _____                     ____    _____"#;
+// const l2: &str = r#"|_   _|__ _ __ _ __ ___   |___ \  |_   _|__ _ __ _ __ ___"#;
+// const l3: &str = r#"  | |/ _ \ '__| '_ ` _ \    __) |   | |/ _ \ '__| '_ ` _ \"#;
+// const l4: &str = r#"  | |  __/ |  | | | | | |  / __/    | |  __/ |  | | | | | |"#;
+// const l5: &str = r#"  |_|\___|_|  |_| |_| |_| |_____|   |_|\___|_|  |_| |_| |_|"#;
+
+// const TITLE: &str = r#"
+//          _____                     ____    _____
+//         |_   _|__ _ __ _ __ ___   |___ \  |_   _|__ _ __ _ __ ___
+//           | |/ _ \ '__| '_ ` _ \    __) |   | |/ _ \ '__| '_ ` _ \
+//           | |  __/ |  | | | | | |  / __/    | |  __/ |  | | | | | |
+//           |_|\___|_|  |_| |_| |_| |_____|   |_|\___|_|  |_| |_| |_|
+//                 "#;
+
+// const TITLE: &str = r#"
+//  _                      ____  _
+// | |_ ___ _ __ _ __ ___ |___ \| |_ ___ _ __ _ __ ___
+// | __/ _ \ '__| '_ ` _ \  __) | __/ _ \ '__| '_ ` _ \
+// | ||  __/ |  | | | | | |/ __/| ||  __/ |  | | | | | |
+// \__\___|_|  |_| |_| |_|_____|\__\___|_|  |_| |_| |_|
+//     "#;
 
 impl Component for Welcome {
     fn register_action_handler(&mut self, tx: UnboundedSender<Action>) -> Result<()> {
@@ -163,8 +184,8 @@ impl Component for Welcome {
     fn handle_key_event(&mut self, key: crossterm::event::KeyEvent) -> Result<Option<Action>> {
         match self.mode {
             Mode::Normal => {
-                match &mut self.state_handler.inner {
-                    PageState::NameAndSuffix(inputs) => match key.code {
+                if let PageState::NameAndSuffix(inputs) = &mut self.state_handler.inner {
+                    match key.code {
                         // switches the current active input
                         KeyCode::Tab => {
                             match inputs.active {
@@ -177,15 +198,12 @@ impl Component for Welcome {
                                 _ => {}
                             };
                         }
-
                         KeyCode::Char('1') => inputs.active = Some(ActiveInput::Name),
                         KeyCode::Char('2') => inputs.active = Some(ActiveInput::Suffix),
                         _ => {}
-                    },
-                    _ => {}
+                    }
                 }
             }
-
             Mode::Editing => {
                 if let PageState::NameAndSuffix(inputs) = &mut self.state_handler.inner {
                     match inputs.active {
@@ -241,27 +259,28 @@ impl Component for Welcome {
         //frame.render_widget(Paragraph::new("hello world"), area);
         match &self.state_handler.inner {
             PageState::WelcomePage => {
-                //let block = Block::bordered()
-                //    .border_type(BorderType::Plain)
-                //    .border_set(Default::default())
-                //    .fg(Color::White);
-                //frame.render_widget(block, area);
-
                 let welcome_block =
                     center(area, Constraint::Percentage(50), Constraint::Percentage(50));
 
-                let title_p = Paragraph::new(Text::from(TITLE).style(Style::new().bold()))
-                    .block(
-                        Block::new()
-                            .style(Style::new().bg(Color::Black))
-                            .padding(Padding::new(0, 0, welcome_block.height / 3, 0)),
+                let title_p = Paragraph::new(
+                    Text::from(
+                        // vec![l0, l1, l2, l3, l4, l5]
+                        //     .into_iter()
+                        //     .map(Line::from)
+                        //     .collect::<Vec<Line>>(),
+                        TITLE,
                     )
-                    .style(Style::new().white())
-                    .alignment(Alignment::Center);
+                    .style(Style::new().bold()),
+                )
+                .block(
+                    Block::new()
+                        .style(Style::new().bg(Color::Black))
+                        .padding(Padding::new(0, 0, welcome_block.height / 3, 0)),
+                )
+                .style(Style::new().white())
+                .alignment(Alignment::Center);
 
                 frame.render_widget(title_p, welcome_block);
-
-                //let t = Paragraph::new(title);
 
                 let p = Paragraph::new(Text::from(vec![
                     Line::from("Press Enter To Begin").style(Style::new().slow_blink())

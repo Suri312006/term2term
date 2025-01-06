@@ -1,0 +1,3 @@
+[workspace]
+
+members = ["hermes", "t2t", "t2t-cli", "termcore"]
